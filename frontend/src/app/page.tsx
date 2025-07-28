@@ -15,15 +15,25 @@ import {
   Plus,
   Users,
   Palette,
-  Link
+  Link,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { Badge } from '@/components/ui/badge';
 import Head from 'next/head';
 
 export default function LandingPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch {
+      // Handle logout error if needed
+    }
+  };
 
   if (loading) {
     return (
@@ -46,17 +56,17 @@ export default function LandingPage() {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between node-header-flex">
             <div className="flex items-center space-x-4">
               <button 
                 onClick={() => router.push('/')}
                 className="flex items-center space-x-4 hover:opacity-80 transition-opacity"
               >
-                <h1 className="text-2xl font-bold text-foreground">Treenode</h1>
+                <h1 className="text-2xl font-bold text-foreground node-header-title">Treenode</h1>
               </button>
               {user && <Badge variant="secondary">Home</Badge>}
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 node-header-actions">
               {user ? (
                 <>
                   <div className="flex items-center space-x-2">
@@ -65,6 +75,10 @@ export default function LandingPage() {
                   </div>
                   <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')}>
                     Dashboard
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
                   </Button>
                 </>
               ) : (

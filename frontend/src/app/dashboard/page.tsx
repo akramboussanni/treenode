@@ -13,7 +13,8 @@ import {
   Edit, 
   Trash2,
   EyeOff,
-  Share2
+  Share2,
+  LogOut
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api';
@@ -21,7 +22,7 @@ import { Node } from '@/types';
 import { config } from '@/config';
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   
@@ -40,8 +41,11 @@ export default function DashboardPage() {
       }
       
       if (response.data) {
-        setNodes(response.data as Node[]);
-      } else {
+        // Handle both null and array responses
+        const nodesData = response.data as Node[];
+        setNodes(Array.isArray(nodesData) ? nodesData : []);
+      } else if (response.error) {
+        // Only show error toast for actual errors
         toast({
           title: "Error",
           description: response.error || "Failed to load nodes",
@@ -58,6 +62,15 @@ export default function DashboardPage() {
       setLoadingNodes(false);
     }
   }, [router, toast]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch {
+      // Handle logout error if needed
+    }
+  };
 
   useEffect(() => {
     if (!loading && user) {
@@ -128,20 +141,30 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between node-header-flex">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-foreground font-serif">Dashboard</h1>
+              <h1 className="text-2xl font-bold text-foreground font-serif node-header-title">Dashboard</h1>
               <Badge variant="secondary" className="bg-cottage-warm text-cottage-brown">
                 {nodes.length} {nodes.length === 1 ? 'Node' : 'Nodes'}
               </Badge>
             </div>
-            <Button
-              onClick={() => router.push('/nodes/create')}
-              className="bg-cottage-green hover:bg-cottage-green/90 text-cottage-cream"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Node
-            </Button>
+            <div className="flex items-center space-x-2 node-header-actions">
+              <Button
+                onClick={() => router.push('/nodes/create')}
+                className="bg-cottage-green hover:bg-cottage-green/90 text-cottage-cream"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Node
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </header>

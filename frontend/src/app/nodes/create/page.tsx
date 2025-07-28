@@ -17,7 +17,8 @@ import {
   Eye,
   EyeOff,
   Check,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
@@ -36,7 +37,7 @@ const createNodeSchema = z.object({
 type CreateNodeFormData = z.infer<typeof createNodeSchema>;
 
 export default function CreateNodePage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isSuccess, setIsSuccess] = useState(false);
@@ -46,6 +47,15 @@ export default function CreateNodePage() {
   const [editingLink, setEditingLink] = useState<LinkType | null>(null);
   const [deletingLink, setDeletingLink] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch {
+      // Handle logout error if needed
+    }
+  };
 
   const {
     register,
@@ -284,7 +294,7 @@ export default function CreateNodePage() {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between node-header-flex">
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
@@ -294,7 +304,17 @@ export default function CreateNodePage() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
               </Button>
-              <h1 className="text-2xl font-bold text-foreground font-serif">Create Link Node</h1>
+              <h1 className="text-2xl font-bold text-foreground font-serif node-header-title">Create Link Node</h1>
+            </div>
+            <div className="flex items-center space-x-2 node-header-actions">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
         </div>

@@ -25,7 +25,8 @@ import {
   Users,
   ChevronUp,
   ChevronDown,
-  GripVertical
+  GripVertical,
+  LogOut
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
@@ -57,7 +58,7 @@ const updateNodeSchema = z.object({
 type UpdateNodeFormData = z.infer<typeof updateNodeSchema>;
 
 export default function NodeManagementPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -79,6 +80,15 @@ export default function NodeManagementPage() {
   const [updatingLink, setUpdatingLink] = useState<string | null>(null);
   const [reorderingLink, setReorderingLink] = useState<string | null>(null);
   const [draggedLinkId, setDraggedLinkId] = useState<string | null>(null);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch {
+      // Handle logout error if needed
+    }
+  };
 
   const {
     register: registerNode,
@@ -547,6 +557,14 @@ export default function NodeManagementPage() {
               >
                 <Globe className="h-4 w-4 mr-2" />
                 View Node
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
             </div>
           </div>

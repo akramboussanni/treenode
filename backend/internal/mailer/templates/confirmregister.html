@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Treenode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #5D4037;
+            background-color: #FEFDF7;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(93, 64, 55, 0.1);
+            border: 1px solid rgba(93, 64, 55, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8B7355 0%, #A67C52 100%);
+            padding: 48px 32px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .content {
+            padding: 48px 32px;
+        }
+        
+        .welcome-text {
+            font-size: 20px;
+            color: #5D4037;
+            margin-bottom: 24px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .description {
+            font-size: 16px;
+            color: #8D6E63;
+            margin-bottom: 40px;
+            text-align: center;
+            line-height: 1.7;
+        }
+        
+        .button-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .confirm-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #8B7355 0%, #A67C52 100%);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(139, 115, 85, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .confirm-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(139, 115, 85, 0.4);
+        }
+        
+        .manual-link {
+            font-size: 14px;
+            color: #8D6E63;
+            margin-top: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        .manual-link a {
+            color: #8B7355;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .manual-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            background-color: #F8F6F0;
+            padding: 32px;
+            text-align: center;
+            border-top: 1px solid rgba(93, 64, 55, 0.1);
+        }
+        
+        .footer p {
+            font-size: 14px;
+            color: #8D6E63;
+            margin-bottom: 8px;
+        }
+        
+        .footer .expiry {
+            font-size: 12px;
+            color: #A1887F;
+            margin-top: 16px;
+            font-style: italic;
+        }
+        
+        .security-note {
+            background-color: #FFF8E1;
+            border-left: 4px solid #FFB74D;
+            padding: 20px;
+            margin: 32px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .security-note h4 {
+            color: #E65100;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .security-note p {
+            color: #BF360C;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .features {
+            background-color: #F8F6F0;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 32px 0;
+        }
+        
+        .features h3 {
+            color: #5D4037;
+            font-size: 18px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+        
+        .feature-icon {
+            color: #8B7355;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+        
+        .feature-text {
+            color: #8D6E63;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 16px;
+                border-radius: 12px;
+            }
+            
+            .header {
+                padding: 32px 24px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .content {
+                padding: 32px 24px;
+            }
+            
+            .confirm-button {
+                padding: 16px 32px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Treenode</h1>
+            <p>Let's get your account set up</p>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-text">
+                Thanks for joining us!
+            </div>
+            
+            <div class="description">
+                To complete your registration and start creating your beautiful link pages, please confirm your email address by clicking the button below.
+            </div>
+            
+            <div class="button-container">
+                <a href="{{.Url}}?token={{.Token}}" class="confirm-button">
+                    Confirm Email Address
+                </a>
+            </div>
+            
+            <div class="manual-link">
+                If the button doesn't work, copy and paste this URL into your browser:<br>
+                <a href="{{.Url}}?token={{.Token}}">{{.Url}}?token={{.Token}}</a>
+            </div>
+            
+            <div class="security-note">
+                <h4>🔒 Security Notice</h4>
+                <p>{{if .Expiry}}This link expires in {{.Expiry}}. If you didn't create an account with us, please ignore this email. Never share this link with anyone.{{else}}This confirmation link will expire in 24 hours. If you didn't create an account with us, please ignore this email. Never share this link with anyone.{{end}}</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>If you have any questions, please contact our support team.</p>
+            <p>Welcome to the Treenode family! 🌳</p>
+            <div class="expiry">
+                {{if .Expiry}}⏰ This link expires in {{.Expiry}}{{else}}⏰ This confirmation link expires in 24 hours{{end}}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

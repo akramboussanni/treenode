@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaboration Invitation - Treenode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #374151;
+            background-color: #f9fafb;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #111827;
+        }
+        
+        .message {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            color: #4b5563;
+        }
+        
+        .highlight {
+            background-color: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .highlight h3 {
+            color: #111827;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .highlight p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 25px 0;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(139, 92, 246, 0.4);
+        }
+        
+        .features {
+            margin: 30px 0;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #8b5cf6;
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .feature-text {
+            color: #4b5563;
+            font-size: 14px;
+        }
+        
+        .footer {
+            background-color: #f9fafb;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .security-note {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 25px 0;
+            font-size: 14px;
+            color: #92400e;
+        }
+        
+        .security-note strong {
+            color: #78350f;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            
+            .header, .content, .footer {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Collaboration Invitation</h1>
+            <p>You've been invited to collaborate on a link page</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Hello!</div>
+            
+            <div class="message">
+                <strong>{{.InviterName}}</strong> has invited you to collaborate on their link page <strong>"{{.PageName}}"</strong> on Treenode.
+            </div>
+            
+            <div class="highlight">
+                <h3>What you'll be able to do:</h3>
+                <p>As a collaborator, you can help manage links, update page settings, and contribute to the page's content.</p>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">Add and edit links</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">Update page appearance</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">Manage page settings</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="{{.AcceptURL}}" class="cta-button">
+                    Accept Invitation
+                </a>
+            </div>
+            
+            <div class="security-note">
+                <strong>Security Note:</strong> This invitation link is unique to you and expires in 7 days. 
+                If you didn't expect this invitation, you can safely ignore this email.
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This invitation was sent from Treenode</p>
+            <p>If you have any questions, please contact the page owner</p>
+        </div>
+    </div>
+</body>
+</html> 

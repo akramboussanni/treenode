@@ -1,0 +1,410 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Cottage beige theme */
+    --background: 35 25% 92%;
+    --foreground: 25 15% 25%;
+
+    --card: 35 35% 96%;
+    --card-foreground: 25 15% 25%;
+
+    --popover: 35 35% 96%;
+    --popover-foreground: 25 15% 25%;
+
+    --primary: 25 45% 35%;
+    --primary-foreground: 35 25% 92%;
+
+    --secondary: 35 20% 85%;
+    --secondary-foreground: 25 15% 25%;
+
+    --muted: 35 15% 88%;
+    --muted-foreground: 25 10% 55%;
+
+    --accent: 40 30% 75%;
+    --accent-foreground: 25 15% 25%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 35 25% 92%;
+
+    --border: 35 20% 80%;
+    --input: 35 25% 90%;
+    --ring: 25 45% 35%;
+
+    --radius: 0.75rem;
+    
+    /* Cottage-specific colors */
+    --cottage-warm: 35 40% 80%;
+    --cottage-cream: 40 30% 95%;
+    --cottage-brown: 25 35% 45%;
+    --cottage-green: 95 25% 45%;
+    --cottage-pink: 340 30% 75%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Page transition animations */
+@layer components {
+  .page-transition-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .page-transition-container > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Button hover animations */
+  .btn-hover-scale {
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .btn-hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .btn-hover-scale:active {
+    transform: scale(0.98);
+  }
+
+  /* Card hover animations */
+  .card-hover-lift {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+
+  .card-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Heart following animation */
+  .following {
+    animation: pulse 1s infinite;
+  }
+
+  .following svg {
+    color: hsl(var(--cottage-pink) / 0.8) !important;
+    fill: hsl(var(--cottage-pink) / 0.6) !important;
+  }
+
+  /* Enhanced click animations */
+  .clicked-heart svg {
+    color: #ec4899 !important;
+    fill: #ec4899 !important;
+    filter: drop-shadow(0 0 8px #ec4899);
+  }
+
+  .sparkle {
+    animation: sparkle 0.6s ease-out;
+  }
+
+  .sparkle svg {
+    filter: drop-shadow(0 0 12px #ec4899) drop-shadow(0 0 20px #f472b6);
+  }
+
+  @keyframes sparkle {
+    0% {
+      filter: brightness(1) drop-shadow(0 0 0px #ec4899);
+    }
+    50% {
+      filter: brightness(1.5) drop-shadow(0 0 20px #ec4899) drop-shadow(0 0 30px #f472b6);
+    }
+    100% {
+      filter: brightness(1) drop-shadow(0 0 0px #ec4899);
+    }
+  }
+
+  /* Particle animation */
+  .animate-ping {
+    animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+}
+
+/* Heart theme animations */
+.following {
+  filter: brightness(1.2) saturate(1.3);
+}
+
+.clicked-heart {
+  filter: brightness(1.5) saturate(1.5);
+}
+
+.sparkle {
+  animation: sparkle 0.8s ease-out;
+}
+
+.sparkle svg {
+  transform: scale(1.4);
+  transition: transform 800ms ease-out;
+}
+
+@keyframes sparkle {
+  0% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(2) saturate(2) drop-shadow(0 0 10px currentColor);
+  }
+  100% {
+    filter: brightness(1.5) saturate(1.5);
+  }
+}
+
+/* Ensure hearts stay visible during animations */
+.heart-container {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Retro Terminal Theme */
+.retro-terminal-bg {
+  background: #000000;
+  font-family: 'Courier New', monospace;
+}
+
+.scanlines {
+  background-image: linear-gradient(
+    transparent 50%,
+    rgba(0, 255, 0, 0.1) 50%
+  );
+  background-size: 100% 4px;
+  animation: scanlines 0.1s linear infinite;
+}
+
+@keyframes scanlines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
+.crt-flicker {
+  animation: flicker 0.15s infinite linear;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    rgba(0, 255, 0, 0.02) 100%
+  );
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
+}
+
+.glitch-effect {
+  pointer-events: none;
+  animation: glitch 0.3s ease-in-out;
+}
+
+.glitch-text {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 0 0 5px currentColor;
+  animation: glitch-text 0.2s ease-in-out;
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes glitch-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.mouse-trail {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.7;
+  animation: trail 0.5s ease-out;
+}
+
+@keyframes trail {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(3); }
+}
+
+/* Neon Cyber Theme */
+.neon-cyber-bg {
+  background: #0a0a0a;
+  font-family: 'Orbitron', 'Arial', sans-serif;
+}
+
+.cyber-grid {
+  background-image: 
+    linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-move 20s linear infinite;
+}
+
+@keyframes grid-move {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+.cyber-glow {
+  animation: cyber-pulse 4s ease-in-out infinite;
+}
+
+@keyframes cyber-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.neon-particle {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: neon-flicker 2s ease-in-out infinite;
+}
+
+@keyframes neon-flicker {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.mouse-glow {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.3;
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+/* Nature Forest Theme */
+.nature-forest-bg {
+  font-family: 'Georgia', serif;
+}
+
+.sunlight-rays {
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(255, 255, 0, 0.05) 0%, transparent 50%);
+  animation: sunlight-shift 10s ease-in-out infinite;
+}
+
+@keyframes sunlight-shift {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.floating-leaf {
+  font-size: 20px;
+  pointer-events: none;
+  animation: leaf-float 6s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.floating-leaf.leaf {
+  animation-duration: 8s;
+}
+
+.floating-leaf.petal {
+  animation-duration: 4s;
+}
+
+@keyframes leaf-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(180deg); }
+}
+
+.breeze-effect {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.2;
+  animation: breeze-pulse 3s ease-in-out infinite;
+}
+
+@keyframes breeze-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.2); }
+}

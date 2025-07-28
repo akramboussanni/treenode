@@ -1,0 +1,473 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { 
+  ArrowLeft, 
+  Plus, 
+  Settings, 
+  Globe, 
+  ExternalLink, 
+  Edit, 
+  Trash2,
+  Eye,
+  EyeOff,
+  Check,
+  X,
+  Palette,
+  Search,
+  Users
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { apiClient } from '@/lib/api';
+import { Node, Link as LinkType } from '@/types';
+import { getIcon, getIconList } from '@/lib/icons';
+import { config } from '@/config';
+import LinkEditor from '@/components/LinkEditor';
+
+const createNodeSchema = z.object({
+  subdomainName: z.string().min(1, 'Subdomain name is required').regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens are allowed'),
+});
+
+type CreateNodeFormData = z.infer<typeof createNodeSchema>;
+
+export default function CreateNodePage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [createdNode, setCreatedNode] = useState<any>(null);
+  const [links, setLinks] = useState<LinkType[]>([]);
+  const [showLinkEditor, setShowLinkEditor] = useState(false);
+  const [editingLink, setEditingLink] = useState<LinkType | null>(null);
+  const [deletingLink, setDeletingLink] = useState<string | null>(null);
+  const [updatingLink, setUpdatingLink] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<CreateNodeFormData>({
+    resolver: zodResolver(createNodeSchema),
+  });
+
+  const subdomainName = watch('subdomainName');
+
+  React.useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [loading, user, router]);
+
+  const handleCreateNode = async (data: CreateNodeFormData) => {
+    try {
+      setIsSubmitting(true);
+      
+      const response = await apiClient.createNode(data.subdomainName);
+      
+      if (response.error === 'Unauthorized') {
+        router.push('/login');
+        return;
+      }
+      
+      if (response.data) {
+        setCreatedNode(response.data);
+        setIsSuccess(true);
+        toast({
+          title: "Success",
+          description: "Node created successfully!",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: response.error || "Failed to create node",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while creating the node",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleViewNode = () => {
+    if (createdNode) {
+      const baseUrl = config.getBaseUrl();
+      window.open(`${baseUrl}/${createdNode.subdomain_name}`, '_blank');
+    }
+  };
+
+  const handleManageNode = () => {
+    if (createdNode) {
+      router.push(`/nodes/${createdNode.id}`);
+    }
+  };
+
+  const handleCreateLink = async (data: any) => {
+    try {
+      // For now, just add to local state since we don't have a node ID yet
+      const newLink: LinkType = {
+        id: `temp-${Date.now()}`,
+        node_id: 'temp', // Will be replaced when node is created
+        name: data.name,
+        display_name: data.display_name,
+        link: data.link,
+        icon: data.icon,
+        visible: data.visible,
+        enabled: data.enabled,
+        mini: data.mini,
+        gradient_type: data.gradient_type,
+        gradient_angle: data.gradient_angle,
+        color_stops: data.color_stops,
+        created_at: Date.now(),
+        updated_at: Date.now(),
+      };
+      
+      setLinks([...links, newLink]);
+      toast({
+        title: "Success",
+        description: "Link added successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while adding the link",
+        variant: "destructive",
+      });
+      throw error; // Re-throw to let LinkEditor know the submission failed
+    }
+  };
+
+  const handleUpdateLink = async (data: any) => {
+    if (!editingLink) return;
+    
+    try {
+      const updatedLinks = links.map(link => 
+        link.id === editingLink.id ? { ...link, ...data } : link
+      );
+      setLinks(updatedLinks);
+      setEditingLink(null);
+      toast({
+        title: "Success",
+        description: "Link updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while updating the link",
+        variant: "destructive",
+      });
+      throw error; // Re-throw to let LinkEditor know the submission failed
+    }
+  };
+
+  const handleDeleteLink = async (linkId: string) => {
+    try {
+      setDeletingLink(linkId);
+      setLinks(links.filter(link => link.id !== linkId));
+      toast({
+        title: "Success",
+        description: "Link deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An error occurred while deleting the link",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingLink(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to login
+  }
+
+  if (isSuccess && createdNode) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="border-b bg-card">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/')}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+                <h1 className="text-2xl font-bold text-foreground">Create Link Node</h1>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Success Content */}
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <Card className="border-cottage-green/20 bg-cottage-cream">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4">
+                  <Check className="h-12 w-12 text-cottage-green" />
+                </div>
+                <CardTitle className="text-cottage-green text-2xl">Node Created Successfully!</CardTitle>
+                <CardDescription>
+                  Your link node is now live and ready to be customized
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="text-center">
+                  <p className="text-lg font-semibold mb-2">Your node is available at:</p>
+                  <div className="flex items-center justify-center space-x-2">
+                    <Globe className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-xl font-mono text-cottage-brown">
+                      {config.getBaseUrl()}/{createdNode.subdomain_name}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button
+                    onClick={handleViewNode}
+                    className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream btn-hover-scale"
+                  >
+                    <Globe className="mr-2 h-4 w-4" />
+                    View Node
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleManageNode}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Manage Node
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="border-b bg-card">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/')}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Button>
+              <h1 className="text-2xl font-bold text-foreground font-serif">Create Link Node</h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <Card className="border-cottage-brown/20 bg-cottage-cream">
+            <CardHeader>
+              <CardTitle className="text-cottage-brown">Create Your Link Node</CardTitle>
+              <CardDescription>
+                Choose a unique subdomain name for your link node. This will be your node's URL.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit(handleCreateNode)} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="subdomainName">Subdomain Name</Label>
+                  <Input
+                    id="subdomainName"
+                    {...register('subdomainName')}
+                    placeholder="my-awesome-links"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This will be your URL: {config.getBaseUrl()}/[subdomain-name]
+                  </p>
+                  {errors.subdomainName && (
+                    <p className="text-sm text-destructive">{errors.subdomainName.message}</p>
+                  )}
+                </div>
+
+                {/* Links Management */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Links</h3>
+                    <Button
+                      type="button"
+                      onClick={() => setShowLinkEditor(true)}
+                      className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Link
+                    </Button>
+                  </div>
+
+                  {links.length > 0 ? (
+                    <div className="space-y-2">
+                      {links.map((link) => (
+                        <Card key={link.id} className="border-cottage-warm bg-cottage-cream">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="text-2xl">
+                                  {React.createElement(getIcon(link.icon), { className: "h-6 w-6" })}
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="text-lg font-semibold text-foreground">
+                                    {link.display_name}
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {link.link}
+                                  </p>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                    {link.visible ? (
+                                      <Badge variant="default" className="text-xs">
+                                        <Eye className="h-3 w-3 mr-1" />
+                                        Visible
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="secondary" className="text-xs">
+                                        <EyeOff className="h-3 w-3 mr-1" />
+                                        Hidden
+                                      </Badge>
+                                    )}
+                                    {link.enabled ? (
+                                      <Badge variant="default" className="text-xs">
+                                        <Check className="h-3 w-3 mr-1" />
+                                        Enabled
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="destructive" className="text-xs">
+                                        <X className="h-3 w-3 mr-1" />
+                                        Disabled
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingLink(link);
+                                    setShowLinkEditor(true);
+                                  }}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteLink(link.id)}
+                                  disabled={deletingLink === link.id}
+                                >
+                                  {deletingLink === link.id ? (
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                      <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-4">No links yet</p>
+                      <Button
+                        type="button"
+                        onClick={() => setShowLinkEditor(true)}
+                        className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Link
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-cottage-green hover:bg-cottage-green/90 text-cottage-cream"
+                >
+                  {isSubmitting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Node
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* LinkEditor Modal */}
+          {showLinkEditor && (
+            <LinkEditor
+              isOpen={showLinkEditor}
+              onClose={() => {
+                setShowLinkEditor(false);
+                setEditingLink(null);
+              }}
+              onSubmit={editingLink ? handleUpdateLink : handleCreateLink}
+              initialData={editingLink || undefined}
+              isEditing={!!editingLink}
+              isSubmitting={updatingLink !== null}
+            />
+          )}
+        </div>
+      </main>
+    </div>
+  );
+} 

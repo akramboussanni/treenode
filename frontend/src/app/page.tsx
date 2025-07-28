@@ -107,12 +107,12 @@ export default function LandingPage() {
           </div>
           
           <h1 className="text-5xl font-bold text-foreground font-serif mb-6">
-            Welcome to
-            <span className="text-cottage-brown"> Treenode</span>
+            <span className="text-cottage-brown">Treenode</span>
+            <br />
+            A robust place to store your links
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Create a beautiful page to share all your important links in one place. 
-            Built by the community, for the community.
+            Create a centralized hub for all your important links. Organize, customize, and share your online presence with a clean, professional interface.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12">
@@ -124,27 +124,17 @@ export default function LandingPage() {
               <Plus className="mr-2 h-5 w-5" />
               Start Creating
             </Button>
-            <Button variant="outline" size="lg">
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => window.open('https://github.com/akramboussanni/treenode', '_blank')}
+            >
               <Github className="mr-2 h-5 w-5" />
               View Source
             </Button>
           </div>
 
-          {/* Community proof */}
-          <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground">
-            <div className="flex items-center">
-              <Users className="h-4 w-4 mr-1 text-cottage-green" />
-              <span>Community driven</span>
-            </div>
-            <div className="flex items-center">
-              <Code className="h-4 w-4 mr-1 text-cottage-green" />
-              <span>Open source</span>
-            </div>
-            <div className="flex items-center">
-              <Heart className="h-4 w-4 mr-1 text-cottage-green" />
-              <span>Built with love</span>
-            </div>
-          </div>
+
         </div>
       </section>
 
@@ -153,10 +143,10 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-foreground font-serif mb-4">
-              Everything you need to get started
+              Everything you need to organize your links
             </h2>
             <p className="text-lg text-muted-foreground">
-              Powerful tools to make your link page look amazing
+              Powerful tools to create and manage your link collection
             </p>
           </div>
 
@@ -165,9 +155,9 @@ export default function LandingPage() {
               <div className="flex items-start space-x-4">
                 <Palette className="h-10 w-10 text-cottage-brown flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Beautiful Themes</h3>
+                  <h3 className="text-xl font-semibold mb-2">Customizable Themes</h3>
                   <p className="text-muted-foreground">
-                    Choose from beautiful themes and customize colors to match your style
+                    Choose from professional themes and customize colors to match your brand
                   </p>
                 </div>
               </div>
@@ -177,9 +167,9 @@ export default function LandingPage() {
               <div className="flex items-start space-x-4">
                 <Link className="h-10 w-10 text-cottage-brown flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Flexible & Powerful</h3>
+                  <h3 className="text-xl font-semibold mb-2">Robust Link Management</h3>
                   <p className="text-muted-foreground">
-                    Add your links with a powerful interface that gives you full control
+                    Add, organize, and manage your links with a powerful interface that gives you full control
                   </p>
                 </div>
               </div>

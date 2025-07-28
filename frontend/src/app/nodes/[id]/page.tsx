@@ -38,6 +38,7 @@ import { config } from '@/config';
 import LinkEditor from '@/components/LinkEditor';
 
 const updateNodeSchema = z.object({
+  subdomain_name: z.string().min(1, 'Subdomain name is required').regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens are allowed'),
   display_name: z.string().min(1, 'Display name is required'),
   description: z.string().optional(),
   background_color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Must be a valid hex color'),
@@ -124,6 +125,7 @@ export default function NodeManagementPage() {
         const nodeData = nodeResponse.data as Node;
         setNode(nodeData);
         resetNode({
+          subdomain_name: nodeData.subdomain_name,
           display_name: nodeData.display_name,
           description: nodeData.description,
           background_color: nodeData.background_color,
@@ -170,6 +172,7 @@ export default function NodeManagementPage() {
   useEffect(() => {
     if (node && !isEditing) {
       resetNode({
+        subdomain_name: node.subdomain_name,
         display_name: node.display_name,
         description: node.description,
         background_color: node.background_color,
@@ -604,6 +607,22 @@ export default function NodeManagementPage() {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="subdomain_name">Subdomain Name</Label>
+                      <Input
+                        id="subdomain_name"
+                        {...registerNode('subdomain_name')}
+                        disabled={!isEditing}
+                        placeholder="my-awesome-links"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        This will be your URL: {config.getBaseUrl()}/[subdomain-name]
+                      </p>
+                      {nodeErrors.subdomain_name && (
+                        <p className="text-sm text-destructive">{nodeErrors.subdomain_name.message}</p>
+                      )}
+                    </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="display_name">Display Name</Label>
                       <Input

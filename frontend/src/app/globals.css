@@ -408,3 +408,53 @@ All colors MUST be HSL.
   0%, 100% { opacity: 0.2; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(1.2); }
 }
+
+@media (max-width: 640px) {
+  /* Node Management Header */
+  .node-header-flex {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+  .node-header-title {
+    font-size: 1.25rem !important;
+  }
+  .node-header-actions {
+    width: 100%;
+    justify-content: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Node Settings Buttons */
+  .node-settings-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    width: 100%;
+  }
+  .node-settings-actions button {
+    width: 100%;
+  }
+
+  /* Link Manager Header */
+  .links-header-flex {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+  .links-header-actions {
+    width: 100%;
+    justify-content: flex-start !important;
+    gap: 0.5rem !important;
+  }
+  /* Link Card Actions */
+  .link-card-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    width: 100%;
+  }
+  .link-card-actions button {
+    width: 100%;
+  }
+}

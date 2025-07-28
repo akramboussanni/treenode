@@ -524,7 +524,7 @@ export default function NodeManagementPage() {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between node-header-flex">
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
@@ -534,9 +534,9 @@ export default function NodeManagementPage() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
               </Button>
-              <h1 className="text-2xl font-bold text-foreground">Manage Node</h1>
+              <h1 className="text-2xl font-bold text-foreground node-header-title">Manage Node</h1>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 node-header-actions">
               <Button
                 variant="outline"
                 size="sm"
@@ -556,14 +556,14 @@ export default function NodeManagementPage() {
           {/* Node Settings */}
           <Card className="mb-8 border-cottage-brown/20 bg-cottage-cream">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between node-settings-actions">
                 <div>
                   <CardTitle className="text-cottage-brown font-serif">Node Settings</CardTitle>
                   <CardDescription>
                     Configure your link page appearance and information
                   </CardDescription>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 node-settings-actions">
                   <Button
                     variant="outline"
                     size="sm"
@@ -879,11 +879,11 @@ export default function NodeManagementPage() {
 
           {/* Links Management */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 links-header-flex">
               <h2 className="text-2xl font-semibold text-foreground">Links</h2>
               <Button
                 onClick={() => setShowLinkEditor(true)}
-                className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream"
+                className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream links-header-actions"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Link
@@ -918,7 +918,7 @@ export default function NodeManagementPage() {
                   onDragEnd={handleDragEnd}
                 >
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between link-card-actions">
                       <div className="flex items-center space-x-4">
                         <div className="text-2xl">
                           {React.createElement(getIcon(link.icon), { className: "h-6 w-6" })}

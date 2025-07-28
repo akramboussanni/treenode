@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"net/http"
 
 	"github.com/akramboussanni/treenode/config"
@@ -29,55 +27,15 @@ func SecurityHeaders(next http.Handler) http.Handler {
 	})
 }
 
-// CSRFProtection adds CSRF token validation for state-changing operations
-func CSRFProtection(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Skip CSRF for GET requests and OPTIONS
-		if r.Method == "GET" || r.Method == "OPTIONS" {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		// Check for CSRF token in header
-		csrfToken := r.Header.Get("X-CSRF-Token")
-		if csrfToken == "" {
-			http.Error(w, "CSRF token missing", http.StatusForbidden)
-			return
-		}
-
-		// Validate CSRF token (simplified - in production, use a proper CSRF library)
-		if !isValidCSRFToken(csrfToken) {
-			http.Error(w, "Invalid CSRF token", http.StatusForbidden)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func isValidCSRFToken(token string) bool {
-	// This is a simplified validation - in production, implement proper CSRF validation
-	// using a library like gorilla/csrf
-	return len(token) >= 32
-}
-
-func GenerateCSRFToken() string {
-	bytes := make([]byte, 32)
-	rand.Read(bytes)
-	return base64.URLEncoding.EncodeToString(bytes)
-}
-
 func CORSHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		origin := r.Header.Get("Origin")
 		if origin != "" {
-			// Only allow specific origins, never wildcard in production
-			if config.App.FrontendCors != "*" && origin == config.App.FrontendCors {
+			if config.App.FrontendCors == "*" {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
-			} else if config.App.FrontendCors == "*" && r.TLS != nil {
-				// Only allow wildcard in development with HTTPS
+			} else if origin == config.App.FrontendCors {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 			}
 		}

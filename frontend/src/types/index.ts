@@ -130,4 +130,22 @@ export interface EmailRequest {
 export interface ApiError {
   error: string;
   message?: string;
+}
+
+export interface Invitation {
+  id: string;
+  node_id: string;
+  user_id: string;
+  email: string;
+  token: string;
+  accepted: boolean;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Collaborator {
+  id: string;
+  username: string;
+  email: string;
 } 

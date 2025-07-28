@@ -174,9 +174,6 @@ void main() {
 
 export default function Galaxy({ 
   accentColor = '#4f46e5', 
-  titleFontColor = '#ffffff', 
-  captionFontColor = '#e5e7eb',
-  backgroundColor = '#000000',
   mouseEffectsEnabled = true
 }: ThemeProps) {
   const ctnDom = useRef<HTMLDivElement>(null);
@@ -223,8 +220,6 @@ export default function Galaxy({
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
 
-    let program: any;
-
     function resize() {
       const scale = 1;
       renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
@@ -241,7 +236,7 @@ export default function Galaxy({
 
     const geometry = new Triangle(gl);
     const hueShift = hexToHue(accentColor);
-    program = new Program(gl, {
+    const program: Program = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,
       uniforms: {
@@ -272,8 +267,6 @@ export default function Galaxy({
         uRotationSpeed: { value: 0.05 },
         uRepulsionStrength: { value: 2.0 },
         uMouseActiveFactor: { value: 0.0 },
-        uAutoCenterRepulsion: { value: 0.0 },
-        uTransparent: { value: true },
       },
     });
 

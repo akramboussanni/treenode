@@ -19,13 +19,10 @@ const LEAF_COUNT = 20;
 
 export default function NatureForest({ 
   accentColor = '#4ade80', 
-  titleFontColor = '#166534', 
-  captionFontColor = '#15803d',
   backgroundColor = '#f0fdf4',
   mouseEffectsEnabled = true
 }: ThemeProps) {
   const [leaves, setLeaves] = useState<Leaf[]>([]);
-  const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mouseRef = useRef({ x: 0, y: 0 });
   const animationId = useRef<number | undefined>(undefined);
   const leavesRef = useRef<Leaf[]>([]);
@@ -48,7 +45,6 @@ export default function NatureForest({
     }
     setLeaves(data);
     leavesRef.current = data;
-    setIsPageLoaded(true);
   }, []);
 
   // Track mouse
@@ -71,8 +67,6 @@ export default function NatureForest({
     if (leaves.length === 0) return;
 
     const loop = () => {
-      const now = performance.now();
-      
       // Update leaves
       leavesRef.current = leavesRef.current.map(leaf => {
         // Update position

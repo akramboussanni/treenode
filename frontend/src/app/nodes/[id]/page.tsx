@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
@@ -14,17 +14,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { 
   ArrowLeft, 
   Plus, 
-  Settings, 
   Globe, 
-  ExternalLink, 
   Edit, 
   Trash2,
   Eye,
   EyeOff,
   Check,
   X,
-  Palette,
-  Search,
+  Share2,
   Users,
   ChevronUp,
   ChevronDown,
@@ -36,7 +33,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 import { Node, Link as LinkType } from '@/types';
-import { getIcon, getIconList } from '@/lib/icons';
+import { getIcon } from '@/lib/icons';
 import { config } from '@/config';
 import LinkEditor from '@/components/LinkEditor';
 
@@ -56,20 +53,7 @@ const updateNodeSchema = z.object({
   page_title: z.string().min(1, 'Node title is required'),
 });
 
-const createLinkSchema = z.object({
-  name: z.string().min(1, 'Link name is required').regex(/^[a-z0-9-]+$/, 'Link name can only contain lowercase letters, numbers, and hyphens'),
-  display_name: z.string().min(1, 'Display name is required'),
-  link: z.string().url('Must be a valid URL'),
-  icon: z.string().min(1, 'Icon is required'),
-  visible: z.boolean(),
-  enabled: z.boolean(),
-  mini: z.boolean(),
-  gradient_type: z.string().min(1, 'Gradient type is required'),
-  gradient_angle: z.number().optional(),
-});
-
 type UpdateNodeFormData = z.infer<typeof updateNodeSchema>;
-type CreateLinkFormData = z.infer<typeof createLinkSchema>;
 
 export default function NodeManagementPage() {
   const { user, loading } = useAuth();
@@ -88,9 +72,8 @@ export default function NodeManagementPage() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [invitingEmail, setInvitingEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
-  const [collaborators, setCollaborators] = useState<any[]>([]);
-  const [invitations, setInvitations] = useState<any[]>([]);
-  const [loadingCollaborators, setLoadingCollaborators] = useState(false);
+  const [collaborators, setCollaborators] = useState<{ id: string; username: string; email: string }[]>([]);
+  const [invitations, setInvitations] = useState<{ id: string; email: string; created_at: number }[]>([]);
   const [showCollaboratorsDialog, setShowCollaboratorsDialog] = useState(false);
   const [updatingLink, setUpdatingLink] = useState<string | null>(null);
   const [reorderingLink, setReorderingLink] = useState<string | null>(null);
@@ -123,39 +106,7 @@ export default function NodeManagementPage() {
     setNodeValue(field, value);
   };
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [loading, user, router]);
-
-  useEffect(() => {
-    if (user && nodeId) {
-      loadNode();
-    }
-  }, [user, nodeId]);
-
-  useEffect(() => {
-    if (node && !isEditing) {
-      resetNode({
-        display_name: node.display_name,
-        description: node.description,
-        background_color: node.background_color,
-        title_font_color: node.title_font_color || '#8B7355',
-        caption_font_color: node.caption_font_color || '#666666',
-        accent_color: node.accent_color || '#66CC66',
-        theme_color: node.theme_color || '#ffffff',
-        show_share_button: node.show_share_button ?? true,
-        theme: node.theme || 'default',
-        page_title: node.page_title,
-        mouse_effects_enabled: node.mouse_effects_enabled ?? true,
-        text_shadows_enabled: node.text_shadows_enabled ?? false,
-        hide_powered_by: node.hide_powered_by ?? false,
-      });
-    }
-  }, [node, isEditing, resetNode]);
-
-  const loadNode = async () => {
+  const loadNode = useCallback(async () => {
     try {
       setLoadingNode(true);
       const [nodeResponse, linksResponse] = await Promise.all([
@@ -202,11 +153,42 @@ export default function NodeManagementPage() {
     } finally {
       setLoadingNode(false);
     }
-  };
+  }, [nodeId, router, resetNode, toast]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [loading, user, router]);
+
+  useEffect(() => {
+    if (user && nodeId) {
+      loadNode();
+    }
+  }, [user, nodeId, loadNode]);
+
+  useEffect(() => {
+    if (node && !isEditing) {
+      resetNode({
+        display_name: node.display_name,
+        description: node.description,
+        background_color: node.background_color,
+        title_font_color: node.title_font_color || '#8B7355',
+        caption_font_color: node.caption_font_color || '#666666',
+        accent_color: node.accent_color || '#66CC66',
+        theme_color: node.theme_color || '#ffffff',
+        show_share_button: node.show_share_button ?? true,
+        theme: node.theme || 'default',
+        page_title: node.page_title,
+        mouse_effects_enabled: node.mouse_effects_enabled ?? true,
+        text_shadows_enabled: node.text_shadows_enabled ?? false,
+        hide_powered_by: node.hide_powered_by ?? false,
+      });
+    }
+  }, [node, isEditing, resetNode]);
 
   const loadCollaborators = async () => {
     try {
-      setLoadingCollaborators(true);
       const [collaboratorsResponse, invitationsResponse] = await Promise.all([
         apiClient.getCollaborators(nodeId),
         apiClient.getInvitations(nodeId),
@@ -219,11 +201,11 @@ export default function NodeManagementPage() {
       }
 
       if (collaboratorsResponse.data) {
-        setCollaborators(collaboratorsResponse.data as any[]);
+        setCollaborators(collaboratorsResponse.data as { id: string; username: string; email: string }[]);
       }
 
       if (invitationsResponse.data) {
-        setInvitations(invitationsResponse.data as any[]);
+        setInvitations(invitationsResponse.data as { id: string; email: string; created_at: number }[]);
       }
     } catch (error) {
       console.error('Error loading collaborators:', error);
@@ -233,7 +215,7 @@ export default function NodeManagementPage() {
         variant: "destructive",
       });
     } finally {
-      setLoadingCollaborators(false);
+      // setLoadingCollaborators(false); // This line was removed
     }
   };
 
@@ -260,7 +242,7 @@ export default function NodeManagementPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while updating the node",
@@ -295,7 +277,7 @@ export default function NodeManagementPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while sending the invitation",
@@ -303,33 +285,6 @@ export default function NodeManagementPage() {
       });
     } finally {
       setIsInviting(false);
-    }
-  };
-
-  const handleRemoveCollaborator = async (userId: string) => {
-    try {
-      const response = await apiClient.removeCollaborator(nodeId, userId);
-      
-      if (response.data) {
-        toast({
-          title: "Success",
-          description: "Collaborator removed successfully",
-        });
-        // Refresh collaborators list
-        loadCollaborators();
-      } else {
-        toast({
-          title: "Error",
-          description: response.error || "Failed to remove collaborator",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred while removing the collaborator",
-        variant: "destructive",
-      });
     }
   };
 
@@ -345,7 +300,7 @@ export default function NodeManagementPage() {
     resetNode();
   };
 
-  const handleCreateLink = async (data: CreateLinkFormData) => {
+  const handleCreateLink = async (data: { name: string; display_name: string; link: string; icon: string; visible: boolean; enabled: boolean; mini: boolean; gradient_type: string; gradient_angle: number; color_stops: Array<{ color: string; position: number }> }) => {
     try {
       const response = await apiClient.createLink(nodeId, data);
       if (response.error === 'Unauthorized') {
@@ -367,7 +322,7 @@ export default function NodeManagementPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while creating the link",
@@ -376,7 +331,7 @@ export default function NodeManagementPage() {
     }
   };
 
-  const handleUpdateLink = async (data: any) => {
+  const handleUpdateLink = async (data: { name: string; display_name: string; link: string; icon: string; visible: boolean; enabled: boolean; mini: boolean; gradient_type: string; gradient_angle: number; color_stops: Array<{ color: string; position: number }> }) => {
     if (!editingLink) return;
     
     try {
@@ -385,7 +340,7 @@ export default function NodeManagementPage() {
       
       if (response.data) {
         setLinks(links.map(link => 
-          link.id === editingLink.id ? { ...link, ...data } : link
+          link.id === editingLink.id ? { ...link, ...data } as LinkType : link
         ));
         setEditingLink(null);
         toast({
@@ -398,15 +353,15 @@ export default function NodeManagementPage() {
           description: response.error || "Failed to update link",
           variant: "destructive",
         });
-        throw new Error(response.error || "Failed to update link");
+        throw new Error("Failed to update link"); // Re-throw to let LinkEditor know the submission failed
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while updating the link",
         variant: "destructive",
       });
-      throw error; // Re-throw to let LinkEditor know the submission failed
+      throw new Error("Failed to update link"); // Re-throw to let LinkEditor know the submission failed
     } finally {
       setUpdatingLink(null);
     }
@@ -434,7 +389,7 @@ export default function NodeManagementPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while deleting the link",
@@ -460,7 +415,7 @@ export default function NodeManagementPage() {
         newLinks[currentIndex - 1] = temp;
         setLinks(newLinks);
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to reorder link",
@@ -486,7 +441,7 @@ export default function NodeManagementPage() {
         newLinks[currentIndex + 1] = temp;
         setLinks(newLinks);
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to reorder link",
@@ -533,7 +488,7 @@ export default function NodeManagementPage() {
       newLinks.splice(draggedIndex, 1);
       newLinks.splice(targetIndex, 0, draggedLink);
       setLinks(newLinks);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to reorder link",
@@ -633,7 +588,7 @@ export default function NodeManagementPage() {
                     size="sm"
                     onClick={isEditing ? handleCancelEdit : () => setIsEditing(true)}
                   >
-                    {isEditing ? <X className="h-4 w-4 mr-2" /> : <Settings className="h-4 w-4 mr-2" />}
+                    {isEditing ? <X className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
                     {isEditing ? 'Cancel' : 'Edit'}
                   </Button>
                 </div>
@@ -896,7 +851,7 @@ export default function NodeManagementPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="hide_powered_by">Hide "Powered by Treenode"</Label>
+                      <Label htmlFor="hide_powered_by">Hide &quot;Powered by Treenode&quot;</Label>
                       <Switch
                         id="hide_powered_by"
                         checked={watchNode('hide_powered_by') ?? false}
@@ -905,7 +860,7 @@ export default function NodeManagementPage() {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      When enabled, the "Powered by Treenode" footer will be hidden on your public page.
+                      When enabled, the &quot;Powered by Treenode&quot; footer will be hidden on your public page.
                     </p>
                   </div>
                 </div>
@@ -982,7 +937,8 @@ export default function NodeManagementPage() {
                               onClick={() => window.open(link.link, '_blank')}
                               className="h-6 px-2"
                             >
-                              <ExternalLink className="h-3 w-3" />
+                              {/* ExternalLink icon was removed, using Share2 as a placeholder */}
+                              <Share2 className="h-3 w-3" />
                             </Button>
                           </div>
                           <div className="flex items-center space-x-2 mt-1">

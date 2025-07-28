@@ -26,10 +26,7 @@ const LERP_FACTOR = 0.25;
 const CLICK_DURATION = 800;
 
 export default function LoveTheme({ 
-  accentColor = '#66CC66', 
-  titleFontColor = '#8B7355', 
-  captionFontColor = '#666666',
-  backgroundColor = '#ffffff',
+  accentColor = '#ff6b9d', 
   mouseEffectsEnabled = true
 }: ThemeProps) {
   const [hearts, setHearts] = useState<HeartData[]>([]);
@@ -80,9 +77,9 @@ export default function LoveTheme({
 
   function darkenHex(hex: string, amount: number = 0.2): string {
     const num = parseInt(hex.slice(1), 16);
-    let r = Math.floor((num >> 16) * (1 - amount));
-    let g = Math.floor(((num >> 8) & 0x00FF) * (1 - amount));
-    let b = Math.floor((num & 0x0000FF) * (1 - amount));
+    const r = Math.floor((num >> 16) * (1 - amount));
+    const g = Math.floor(((num >> 8) & 0x00FF) * (1 - amount));
+    const b = Math.floor((num & 0x0000FF) * (1 - amount));
     return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
   }
 
@@ -164,7 +161,7 @@ export default function LoveTheme({
     };
     animationId.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationId.current!);
-  }, [hearts.length, mouseEffectsEnabled]);
+  }, [hearts.length, mouseEffectsEnabled, accentColor]);
 
   const onHeartClick = (id: number, event: React.MouseEvent) => {
     const rect = event.currentTarget.getBoundingClientRect();

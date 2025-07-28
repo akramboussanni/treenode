@@ -1,6 +1,6 @@
 import { config } from '@/config';
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
@@ -49,10 +49,10 @@ class ApiClient {
         }
       }
 
-      let data: any;
+      let data: unknown;
       try {
         data = await response.json();
-      } catch (error) {
+      } catch {
         // Handle empty response body (like in confirm email)
         if (response.ok) {
           return { data: { message: 'Success' } as T };
@@ -62,11 +62,12 @@ class ApiClient {
       }
       
       if (!response.ok) {
-        return { error: data.error || 'Request failed' };
+        const errorData = data as { error?: string };
+        return { error: errorData.error || 'Request failed' };
       }
 
-      return { data };
-    } catch (error) {
+      return { data: data as T };
+    } catch {
       return { error: 'Network error' };
     }
   }

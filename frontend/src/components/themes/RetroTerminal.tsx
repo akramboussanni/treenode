@@ -249,11 +249,7 @@ function hexToRgb(hex: string): [number, number, number] {
 
 export default function RetroTerminal({ 
   accentColor = '#00ff00', 
-  titleFontColor = '#ffffff', 
-  captionFontColor = '#cccccc',
-  backgroundColor = '#000000',
-  mouseEffectsEnabled = true,
-  textShadowsEnabled = true
+  mouseEffectsEnabled = true
 }: ThemeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const programRef = useRef<Program>(null);

@@ -8,23 +8,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { 
   ArrowLeft, 
   Plus, 
-  Settings, 
   Globe, 
-  ExternalLink, 
   Edit, 
   Trash2,
   Eye,
   EyeOff,
   Check,
-  X,
-  Palette,
-  Search,
-  Users
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
@@ -32,7 +25,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 import { Node, Link as LinkType } from '@/types';
-import { getIcon, getIconList } from '@/lib/icons';
+import { getIcon } from '@/lib/icons';
 import { config } from '@/config';
 import LinkEditor from '@/components/LinkEditor';
 
@@ -46,26 +39,21 @@ export default function CreateNodePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [createdNode, setCreatedNode] = useState<any>(null);
+  const [createdNode, setCreatedNode] = useState<Node | null>(null);
   const [links, setLinks] = useState<LinkType[]>([]);
   const [showLinkEditor, setShowLinkEditor] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkType | null>(null);
   const [deletingLink, setDeletingLink] = useState<string | null>(null);
-  const [updatingLink, setUpdatingLink] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<CreateNodeFormData>({
     resolver: zodResolver(createNodeSchema),
   });
-
-  const subdomainName = watch('subdomainName');
 
   React.useEffect(() => {
     if (!loading && !user) {
@@ -85,7 +73,7 @@ export default function CreateNodePage() {
       }
       
       if (response.data) {
-        setCreatedNode(response.data);
+        setCreatedNode(response.data as Node);
         setIsSuccess(true);
         toast({
           title: "Success",
@@ -98,7 +86,7 @@ export default function CreateNodePage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while creating the node",
@@ -122,7 +110,7 @@ export default function CreateNodePage() {
     }
   };
 
-  const handleCreateLink = async (data: any) => {
+  const handleCreateLink = async (data: { name: string; display_name: string; link: string; icon: string; visible: boolean; enabled: boolean; mini: boolean; gradient_type: string; gradient_angle: number; color_stops: Array<{ color: string; position: number }> }) => {
     try {
       // For now, just add to local state since we don't have a node ID yet
       const newLink: LinkType = {
@@ -135,9 +123,16 @@ export default function CreateNodePage() {
         visible: data.visible,
         enabled: data.enabled,
         mini: data.mini,
+        position: links.length, // Add position based on current number of links
         gradient_type: data.gradient_type,
         gradient_angle: data.gradient_angle,
-        color_stops: data.color_stops,
+        color_stops: data.color_stops.map((stop, index) => ({
+          id: `temp-${Date.now()}-${index}`,
+          link_id: `temp-${Date.now()}`,
+          color: stop.color,
+          position: stop.position,
+          created_at: Date.now(),
+        })),
         created_at: Date.now(),
         updated_at: Date.now(),
       };
@@ -147,22 +142,22 @@ export default function CreateNodePage() {
         title: "Success",
         description: "Link added successfully",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while adding the link",
         variant: "destructive",
       });
-      throw error; // Re-throw to let LinkEditor know the submission failed
+      throw new Error("Failed to add link"); // Re-throw to let LinkEditor know the submission failed
     }
   };
 
-  const handleUpdateLink = async (data: any) => {
+  const handleUpdateLink = async (data: { name: string; display_name: string; link: string; icon: string; visible: boolean; enabled: boolean; mini: boolean; gradient_type: string; gradient_angle: number; color_stops: Array<{ color: string; position: number }> }) => {
     if (!editingLink) return;
     
     try {
       const updatedLinks = links.map(link => 
-        link.id === editingLink.id ? { ...link, ...data } : link
+        link.id === editingLink.id ? { ...link, ...data } as LinkType : link
       );
       setLinks(updatedLinks);
       setEditingLink(null);
@@ -170,13 +165,13 @@ export default function CreateNodePage() {
         title: "Success",
         description: "Link updated successfully",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while updating the link",
         variant: "destructive",
       });
-      throw error; // Re-throw to let LinkEditor know the submission failed
+      throw new Error("Failed to update link"); // Re-throw to let LinkEditor know the submission failed
     }
   };
 
@@ -188,7 +183,7 @@ export default function CreateNodePage() {
         title: "Success",
         description: "Link deleted successfully",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while deleting the link",
@@ -312,7 +307,7 @@ export default function CreateNodePage() {
             <CardHeader>
               <CardTitle className="text-cottage-brown">Create Your Link Node</CardTitle>
               <CardDescription>
-                Choose a unique subdomain name for your link node. This will be your node's URL.
+                Choose a unique subdomain name for your link node. This will be your node&apos;s URL.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -463,7 +458,7 @@ export default function CreateNodePage() {
               onSubmit={editingLink ? handleUpdateLink : handleCreateLink}
               initialData={editingLink || undefined}
               isEditing={!!editingLink}
-              isSubmitting={updatingLink !== null}
+              isSubmitting={false}
             />
           )}
         </div>

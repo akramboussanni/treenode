@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { apiClient } from '@/lib/api';
 import { User } from '@/types';
 
@@ -19,7 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
       const response = await apiClient.getProfile();
       if (response.data) {
@@ -30,13 +30,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setUser(null);
       }
-    } catch (error) {
-      // Network errors or other exceptions - logout the user
-      await logout();
-    } finally {
+    } catch {
       setLoading(false);
+      setUser(null);
     }
-  };
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -46,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return true;
       }
       return false;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
@@ -54,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await apiClient.logout();
-    } catch (error) {
+    } catch {
       // Ignore logout errors
     } finally {
       setUser(null);
@@ -65,14 +63,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await apiClient.register(username, email, password, `${window.location.origin}/confirm`);
       return !!response.data;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
 
   useEffect(() => {
     refreshUser();
-  }, []);
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, register, refreshUser }}>

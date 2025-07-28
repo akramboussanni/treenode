@@ -48,10 +48,7 @@ void main() {
 `;
 
 export default function Iridescence({ 
-  accentColor = '#8b5cf6', 
-  titleFontColor = '#ffffff', 
-  captionFontColor = '#e5e7eb',
-  backgroundColor = '#000000',
+  accentColor = '#4f46e5', 
   mouseEffectsEnabled = true
 }: ThemeProps) {
   const ctnDom = useRef<HTMLDivElement>(null);
@@ -76,8 +73,6 @@ export default function Iridescence({
     const gl = renderer.gl;
     gl.clearColor(1, 1, 1, 1);
 
-    let program: any;
-
     function resize() {
       const scale = 1;
       renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
@@ -94,7 +89,7 @@ export default function Iridescence({
 
     const geometry = new Triangle(gl);
     const color = hexToRgb(accentColor);
-    program = new Program(gl, {
+    const program: Program = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,
       uniforms: {

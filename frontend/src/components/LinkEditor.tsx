@@ -14,15 +14,28 @@ import {
 import { getIcon, getIconList } from '@/lib/icons';
 import { Link as LinkType } from '@/types';
 
-interface ColorStop {
+interface FormColorStop {
   color: string;
   position: number;
+}
+
+interface LinkFormData {
+  name: string;
+  display_name: string;
+  link: string;
+  icon: string;
+  visible: boolean;
+  enabled: boolean;
+  mini: boolean;
+  gradient_type: string;
+  gradient_angle: number;
+  color_stops: FormColorStop[];
 }
 
 interface LinkEditorProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: LinkFormData) => void;
   initialData?: Partial<LinkType>;
   isEditing?: boolean;
   isSubmitting?: boolean;
@@ -48,8 +61,8 @@ export default function LinkEditor({
     gradient_angle: initialData?.gradient_angle || 0,
   });
 
-  const [colorStops, setColorStops] = useState<ColorStop[]>(
-    initialData?.color_stops || []
+  const [colorStops, setColorStops] = useState<FormColorStop[]>(
+    initialData?.color_stops?.map(stop => ({ color: stop.color, position: stop.position })) || []
   );
   const [selectedGradientType, setSelectedGradientType] = useState<string>(
     initialData?.gradient_type || 'solid'
@@ -101,7 +114,7 @@ export default function LinkEditor({
     }
   }, [isOpen, initialData]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: keyof typeof formData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -415,7 +428,7 @@ export default function LinkEditor({
                         {colorStops.length === 0 ? (
                           <div className="text-sm text-muted-foreground p-3 border rounded-md bg-gray-50">
                             <div className="font-medium mb-1">No colors added yet</div>
-                            <div>Click "Add Color" to start building your gradient, or try a preset below.</div>
+                            <div>Click &quot;Add Color&quot; to start building your gradient, or try a preset below.</div>
                           </div>
                         ) : (
                           colorStops.map((stop, index) => (

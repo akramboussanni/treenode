@@ -5,10 +5,7 @@ import { Renderer, Program, Mesh, Triangle } from 'ogl';
 import { ThemeProps } from './types';
 
 export default function LiquidChrome({ 
-  accentColor = '#00ffff', 
-  titleFontColor = '#ffffff', 
-  captionFontColor = '#cccccc',
-  backgroundColor = '#000000',
+  accentColor = '#4f46e5', 
   mouseEffectsEnabled = true
 }: ThemeProps) {
   const containerRef = useRef<HTMLDivElement>(null);

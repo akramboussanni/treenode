@@ -92,7 +92,7 @@ import {
   // Add more icons as needed
 } from 'lucide-react';
 
-export const iconMap: Record<string, any> = {
+export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   // Social Media
   twitter: Twitter,
   github: Github,

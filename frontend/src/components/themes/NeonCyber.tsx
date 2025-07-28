@@ -17,13 +17,9 @@ const PARTICLE_COUNT = 25;
 
 export default function NeonCyber({ 
   accentColor = '#00ffff', 
-  titleFontColor = '#ffffff', 
-  captionFontColor = '#cccccc',
-  backgroundColor = '#0a0a0a',
   mouseEffectsEnabled = true
 }: ThemeProps) {
   const [particles, setParticles] = useState<NeonParticle[]>([]);
-  const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mouseRef = useRef({ x: 0, y: 0 });
   const animationId = useRef<number | undefined>(undefined);
   const particlesRef = useRef<NeonParticle[]>([]);
@@ -44,7 +40,6 @@ export default function NeonCyber({
     }
     setParticles(data);
     particlesRef.current = data;
-    setIsPageLoaded(true);
   }, []);
 
   // Track mouse
@@ -67,8 +62,6 @@ export default function NeonCyber({
     if (particles.length === 0) return;
 
     const loop = () => {
-      const now = performance.now();
-      
       // Update particles
       particlesRef.current = particlesRef.current.map(particle => {
         // Update position

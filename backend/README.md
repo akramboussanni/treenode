@@ -32,7 +32,6 @@ supported env vars:
 ```
 # ---- required ----
 JWT_SECRET=[my jwt secret] - at least 32 chars
-CADDY_PATH=blabla
 
 -- not required for local development
 FRONTEND_CORS=https://example.com # google cors syntax for more info

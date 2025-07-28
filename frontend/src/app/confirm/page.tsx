@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { CheckCircle, XCircle, Mail, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api';
 
-export default function ConfirmPage() {
+function ConfirmPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -22,17 +22,7 @@ export default function ConfirmPage() {
   const token = searchParams.get('token');
   const email = searchParams.get('email');
 
-  useEffect(() => {
-    if (!token) {
-      setStatus('error');
-      setMessage('Invalid confirmation link. Please check your email and try again.');
-      return;
-    }
-
-    confirmEmail();
-  }, [token]);
-
-  const confirmEmail = async () => {
+  const confirmEmail = useCallback(async () => {
     try {
       setStatus('loading');
       const response = await apiClient.confirmEmail(token!);
@@ -44,16 +34,17 @@ export default function ConfirmPage() {
         setStatus('error');
         setMessage(response.error || 'Failed to confirm email. Please try again.');
       }
-    } catch (error: any) {
-      if (error.message?.includes('expired')) {
-        setStatus('expired');
-        setMessage('This confirmation link has expired. Please request a new one.');
-      } else {
-        setStatus('error');
-        setMessage('An error occurred while confirming your email. Please try again.');
-      }
+    } catch {
+      setStatus('expired');
+      setMessage('This confirmation link has expired. Please request a new one.');
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      confirmEmail();
+    }
+  }, [token, confirmEmail]);
 
   const resendConfirmation = async () => {
     if (!email) {
@@ -81,7 +72,7 @@ export default function ConfirmPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An error occurred while sending the confirmation email.",
@@ -232,5 +223,38 @@ export default function ConfirmPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="border-cottage-brown/20 bg-cottage-cream shadow-lg">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Mail className="h-16 w-16 text-cottage-brown" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-cottage-brown">
+              Loading...
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Please wait while we load the confirmation page...
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cottage-brown"></div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+export default function ConfirmPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ConfirmPageContent />
+    </Suspense>
   );
 } 

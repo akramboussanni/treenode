@@ -1,33 +1,24 @@
 'use client';
 
-import { useAuth } from '@/contexts/auth-context';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card } from '@/components/ui/card';
 import { 
-  TreePine, 
-  Link, 
-  Palette, 
-  Smartphone, 
   Globe, 
-  ArrowRight, 
-  LogIn, 
-  UserPlus,
-  Sparkles,
-  CheckCircle,
-  Users,
-  Zap,
-  User,
-  Plus,
-  Play,
-  Heart,
+  Heart, 
   Star,
   Coffee,
   Github,
-  Code
+  Code,
+  User,
+  Plus,
+  Users,
+  Palette,
+  Link
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
+import { Badge } from '@/components/ui/badge';
 import Head from 'next/head';
 
 export default function LandingPage() {

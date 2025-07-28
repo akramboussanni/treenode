@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ExternalLink, Share2 } from 'lucide-react';
@@ -47,38 +47,6 @@ const getGradientStyle = (link: LinkType): React.CSSProperties => {
   return {};
 };
 
-// Helper function to create gradient icon style
-const getGradientIconStyle = (link: LinkType, node: Node): React.CSSProperties => {
-  if (!link.gradient_type || !link.color_stops || link.color_stops.length === 0) {
-    return { color: node.theme_color || '#ffffff' };
-  }
-
-  const stops = link.color_stops
-    .sort((a, b) => a.position - b.position)
-    .map(stop => `${stop.color} ${stop.position}%`)
-    .join(', ');
-
-  if (link.gradient_type === 'solid') {
-    return { color: link.color_stops[0].color };
-  } else if (link.gradient_type === 'linear') {
-    return {
-      background: `linear-gradient(${link.gradient_angle || 0}deg, ${stops})`,
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
-    };
-  } else if (link.gradient_type === 'radial') {
-    return {
-      background: `radial-gradient(circle, ${stops})`,
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
-    };
-  }
-
-  return { color: node.theme_color || '#ffffff' };
-};
-
 export default function PublicNode() {
   const params = useParams();
   const [node, setNode] = useState<Node | null>(null);
@@ -86,11 +54,7 @@ export default function PublicNode() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadPublicNode();
-  }, [params.name]);
-
-  const loadPublicNode = async () => {
+  const loadPublicNode = useCallback(async () => {
     if (!params.name) {
       setError('Node not found');
       setLoading(false);
@@ -118,7 +82,11 @@ export default function PublicNode() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.name]);
+
+  useEffect(() => {
+    loadPublicNode();
+  }, [params.name, loadPublicNode]);
 
   const handleLinkClick = (link: LinkType) => {
     window.open(link.link, '_blank');
@@ -159,7 +127,7 @@ export default function PublicNode() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Node Not Found</h1>
           <p className="text-muted-foreground">
-            The node you're looking for doesn't exist.
+            The node you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
       </div>
@@ -281,7 +249,6 @@ export default function PublicNode() {
             {links.filter(link => link.mini).length > 0 && (
               <div className={`flex items-center justify-center space-x-4 mb-8 ${node.text_shadows_enabled ? 'drop-shadow-lg' : ''}`} style={{ zIndex: node.theme !== 'default' ? 50 : 'auto' }}>
                 {links.filter(link => link.mini).map((link) => {
-                  const iconStyle = getGradientIconStyle(link, node);
                   return (
                     <div
                       key={link.id}
@@ -293,11 +260,7 @@ export default function PublicNode() {
                       title={link.display_name}
                     >
                       {React.createElement(getIcon(link.icon), { 
-                        className: "h-6 w-6",
-                        style: {
-                          ...iconStyle,
-                          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))'
-                        }
+                        className: "h-6 w-6"
                       })}
                     </div>
                   );
@@ -355,7 +318,10 @@ export default function PublicNode() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className="text-2xl">
+                        <div 
+                          className="text-2xl"
+                          style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }}
+                        >
                           {React.createElement(getIcon(link.icon), { className: "h-6 w-6" })}
                         </div>
                         <div>

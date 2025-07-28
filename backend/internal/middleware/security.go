@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/akramboussanni/treenode/config"
 )
@@ -32,12 +34,30 @@ func CORSHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		origin := r.Header.Get("Origin")
+		log.Printf("CORS Debug: Request origin='%s', configured FrontendCors='%s'", origin, config.App.FrontendCors)
+
 		if origin != "" {
+			// Handle wildcard CORS for development
 			if config.App.FrontendCors == "*" {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
-			} else if origin == config.App.FrontendCors {
+				log.Printf("CORS: Setting wildcard origin for '%s'", origin)
+			} else if config.App.FrontendCors == origin {
+				// Exact match
 				w.Header().Set("Access-Control-Allow-Origin", origin)
+				log.Printf("CORS: Setting specific origin for '%s'", origin)
+			} else if strings.HasPrefix(config.App.FrontendCors, "*.") {
+				domain := strings.TrimPrefix(config.App.FrontendCors, "*.")
+				if strings.HasSuffix(origin, "."+domain) || origin == "https://"+domain {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+					log.Printf("CORS: Setting wildcard subdomain origin for '%s' (matches '*.%s')", origin, domain)
+				} else {
+					log.Printf("CORS: Origin '%s' does not match wildcard subdomain '*.%s' - NO HEADER SET", origin, domain)
+				}
+			} else {
+				log.Printf("CORS: Origin '%s' does not match configured '%s' - NO HEADER SET", origin, config.App.FrontendCors)
 			}
+		} else {
+			log.Printf("CORS: No Origin header in request")
 		}
 
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")

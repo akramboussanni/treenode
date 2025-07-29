@@ -164,7 +164,7 @@ export default function LinkEditor({
     // Ensure there's always at least one color stop
     let finalColorStops = colorStops;
     if (colorStops.length === 0) {
-      finalColorStops = [{ color: '#ffffff', position: 0 }];
+      finalColorStops = [{ color: '#F5F1E8', position: 0 }];
     }
     
     // For solid fill, ensure we only have one color stop
@@ -594,7 +594,7 @@ export default function LinkEditor({
                       <div className="flex items-center space-x-2">
                         <input
                           type="color"
-                          value={colorStops.length > 0 ? colorStops[0].color : '#ffffff'}
+                          value={colorStops.length > 0 ? colorStops[0].color : '#F5F1E8'}
                           onChange={(e) => {
                             if (colorStops.length > 0) {
                               const newStops = [...colorStops];
@@ -607,7 +607,7 @@ export default function LinkEditor({
                           className="w-12 h-8 border rounded"
                         />
                         <span className="text-sm text-muted-foreground">
-                          {colorStops.length > 0 ? colorStops[0].color : '#ffffff'}
+                          {colorStops.length > 0 ? colorStops[0].color : '#F5F1E8'}
                         </span>
                       </div>
                     </div>

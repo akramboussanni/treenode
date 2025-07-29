@@ -209,7 +209,7 @@ export default function PublicNode() {
                         style={{
                           color: link.custom_accent_color_enabled && link.custom_accent_color 
                             ? link.custom_accent_color 
-                            : node.accent_color || '#66CC66'
+                            : node.accent_color || '#8B9A47'
                         }}
                       >
                         {React.createElement(getIcon(link.icon), { 
@@ -229,8 +229,8 @@ export default function PublicNode() {
                   size="sm"
                   onClick={handleShare}
                   style={{ 
-                    borderColor: node.accent_color || '#66CC66',
-                    color: node.accent_color || '#66CC66',
+                    borderColor: node.accent_color || '#8B9A47',
+                    color: node.accent_color || '#8B9A47',
                     textShadow: node.text_shadows_enabled ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
                     boxShadow: node.text_shadows_enabled ? '0 4px 8px rgba(0,0,0,0.2)' : 'none'
                   }}
@@ -241,7 +241,7 @@ export default function PublicNode() {
                 <Badge 
                   variant="secondary"
                   style={{ 
-                    backgroundColor: node.accent_color || '#66CC66',
+                    backgroundColor: node.accent_color || '#8B9A47',
                     color: '#ffffff',
                     textShadow: node.text_shadows_enabled ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
                     boxShadow: node.text_shadows_enabled ? '0 4px 8px rgba(0,0,0,0.2)' : 'none'
@@ -265,9 +265,9 @@ export default function PublicNode() {
                   className={`card-hover-lift cursor-pointer transition-all duration-200 hover:scale-[1.02] bg-transparent ${node.theme !== 'default' ? 'drop-shadow-lg' : ''}`}
                   style={{
                     ...gradientStyle,
-                    borderColor: link.custom_accent_color_enabled && link.custom_accent_color 
-                      ? link.custom_accent_color 
-                      : node.accent_color || '#66CC66',
+                                          borderColor: link.custom_accent_color_enabled && link.custom_accent_color 
+                        ? link.custom_accent_color 
+                        : node.accent_color || '#8B9A47',
                     boxShadow: node.text_shadows_enabled ? '0 8px 16px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2)' : 'none'
                   }}
                   onClick={() => handleLinkClick(link)}
@@ -281,7 +281,7 @@ export default function PublicNode() {
                             filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
                             color: link.custom_accent_color_enabled && link.custom_accent_color 
                               ? link.custom_accent_color 
-                              : node.accent_color || '#66CC66'
+                              : node.accent_color || '#8B9A47'
                           }}
                         >
                           {React.createElement(getIcon(link.icon), { className: "h-6 w-6" })}
@@ -338,7 +338,7 @@ export default function PublicNode() {
                               style={{ 
                                 color: link.custom_accent_color_enabled && link.custom_accent_color 
                                   ? link.custom_accent_color 
-                                  : node.accent_color || '#66CC66'
+                                  : node.accent_color || '#8B9A47'
                               }}
                             />
                           </button>
@@ -348,7 +348,7 @@ export default function PublicNode() {
                           style={{ 
                             color: link.custom_accent_color_enabled && link.custom_accent_color 
                               ? link.custom_accent_color 
-                              : node.accent_color || '#66CC66'
+                              : node.accent_color || '#8B9A47'
                           }}
                         />
                       </div>
@@ -373,7 +373,7 @@ export default function PublicNode() {
                 <span 
                   className={`font-semibold ${node.text_shadows_enabled ? 'drop-shadow-sm' : ''}`}
                   style={{ 
-                    color: node.accent_color || '#66CC66',
+                    color: node.accent_color || '#8B9A47',
                     textShadow: node.text_shadows_enabled ? '0 1px 2px rgba(0,0,0,0.3)' : 'none'
                   }}
                 >

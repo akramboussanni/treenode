@@ -200,9 +200,9 @@ export default function ThemeSelector({
   onSaveChanges,
   selectedTheme = 'ballpit',
   className = '',
-  themeColor = '#ffffff',
+          themeColor = '#F5F1E8',
   accentColor = '#4f46e5',
-  backgroundColor = '#ffffff'
+      backgroundColor = '#F5F1E8'
 }: ThemeSelectorProps) {
   const [previewTheme, setPreviewTheme] = useState<string>(selectedTheme);
   const [themesCollapsed, setThemesCollapsed] = useState(false);

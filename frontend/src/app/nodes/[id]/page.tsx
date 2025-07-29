@@ -168,8 +168,8 @@ export default function NodeManagementPage() {
           background_color: nodeData.background_color,
           title_font_color: nodeData.title_font_color || '#8B7355',
           caption_font_color: nodeData.caption_font_color || '#666666',
-          accent_color: nodeData.accent_color || '#66CC66',
-          theme_color: nodeData.theme_color || '#ffffff',
+          accent_color: nodeData.accent_color || '#8B9A47',
+          theme_color: nodeData.theme_color || '#F5F1E8',
           show_share_button: nodeData.show_share_button ?? true,
           theme: nodeData.theme || 'default',
           page_title: nodeData.page_title,
@@ -215,8 +215,8 @@ export default function NodeManagementPage() {
         background_color: node.background_color,
         title_font_color: node.title_font_color || '#8B7355',
         caption_font_color: node.caption_font_color || '#666666',
-        accent_color: node.accent_color || '#66CC66',
-        theme_color: node.theme_color || '#ffffff',
+        accent_color: node.accent_color || '#8B9A47',
+        theme_color: node.theme_color || '#F5F1E8',
         show_share_button: node.show_share_button ?? true,
         theme: node.theme || 'default',
         page_title: node.page_title,
@@ -713,14 +713,14 @@ export default function NodeManagementPage() {
                       <Input
                         id="background_color"
                         type="color"
-                        value={watchNode('background_color') || '#ffffff'}
+                        value={watchNode('background_color') || '#F5F1E8'}
                         onChange={(e) => handleColorChange('background_color', e.target.value)}
                         className="w-20 h-10"
                       />
-                      <Input
-                        {...registerNode('background_color')}
-                        placeholder="#ffffff"
-                      />
+                                              <Input
+                          {...registerNode('background_color')}
+                          placeholder="#F5F1E8"
+                        />
                     </div>
                     {nodeErrors.background_color && (
                       <p className="text-sm text-destructive">{nodeErrors.background_color.message}</p>
@@ -773,13 +773,13 @@ export default function NodeManagementPage() {
                       <Input
                         id="accent_color"
                         type="color"
-                        value={watchNode('accent_color') || '#66CC66'}
+                        value={watchNode('accent_color') || '#8B9A47'}
                         onChange={(e) => handleColorChange('accent_color', e.target.value)}
                         className="w-20 h-10"
                       />
                       <Input
                         {...registerNode('accent_color')}
-                        placeholder="#66CC66"
+                        placeholder="#8B9A47"
                       />
                     </div>
                     {nodeErrors.accent_color && (
@@ -822,8 +822,8 @@ export default function NodeManagementPage() {
                         onSaveChanges={() => handleUpdateNode(watchNode())}
                         className="bg-card border rounded-lg p-6"
                         themeColor={watchNode('theme_color') || '#ffffff'}
-                        accentColor={watchNode('accent_color') || '#66CC66'}
-                        backgroundColor={watchNode('background_color') || '#ffffff'}
+                        accentColor={watchNode('accent_color') || '#8B9A47'}
+                        backgroundColor={watchNode('background_color') || '#F5F1E8'}
                       />
                     </div>
                     
@@ -849,14 +849,14 @@ export default function NodeManagementPage() {
                       <Input
                         id="theme_color"
                         type="color"
-                        value={watchNode('theme_color') || '#ffffff'}
+                        value={watchNode('theme_color') || '#F5F1E8'}
                         onChange={(e) => handleColorChange('theme_color', e.target.value)}
                         className="w-20 h-10"
                       />
-                      <Input
-                        {...registerNode('theme_color')}
-                        placeholder="#ffffff"
-                      />
+                                              <Input
+                          {...registerNode('theme_color')}
+                          placeholder="#F5F1E8"
+                        />
                     </div>
                     {nodeErrors.theme_color && (
                       <p className="text-sm text-destructive">{nodeErrors.theme_color.message}</p>

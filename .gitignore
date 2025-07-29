@@ -60,6 +60,8 @@ docs/
 .DS_Store
 *.pem
 
+main
+
 # debug
 npm-debug.log*
 yarn-debug.log*

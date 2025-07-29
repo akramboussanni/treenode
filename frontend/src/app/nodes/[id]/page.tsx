@@ -945,6 +945,13 @@ export default function NodeManagementPage() {
                 </CollapsibleContent>
               </Collapsible>
 
+              {/* Hidden input for theme */}
+              <input
+                type="hidden"
+                {...registerNode('theme')}
+                value={watchNode('theme') || 'default'}
+              />
+              
               <Button type="submit" className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream">
                 <Check className="h-4 w-4 mr-2" />
                 Save Changes

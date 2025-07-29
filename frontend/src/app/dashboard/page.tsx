@@ -20,6 +20,14 @@ import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api';
 import { Node } from '@/types';
 import { config } from '@/config';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 
 export default function DashboardPage() {
@@ -30,6 +38,8 @@ export default function DashboardPage() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [loadingNodes, setLoadingNodes] = useState(true);
   const [deletingNode, setDeletingNode] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [nodeToDelete, setNodeToDelete] = useState<Node | null>(null);
 
 
   const loadNodes = useCallback(async () => {
@@ -80,10 +90,17 @@ export default function DashboardPage() {
     }
   }, [loading, user, loadNodes]);
 
-  const handleDeleteNode = async (nodeId: string) => {
+  const handleDeleteNode = (node: Node) => {
+    setNodeToDelete(node);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!nodeToDelete) return;
+    
     try {
-      setDeletingNode(nodeId);
-      const response = await apiClient.deleteNode(nodeId);
+      setDeletingNode(nodeToDelete.id);
+      const response = await apiClient.deleteNode(nodeToDelete.id);
       
       if (response.error === 'Unauthorized') {
         router.push('/login');
@@ -91,7 +108,7 @@ export default function DashboardPage() {
       }
       
       if (response.data) {
-        setNodes(nodes.filter(node => node.id !== nodeId));
+        setNodes(nodes.filter(node => node.id !== nodeToDelete.id));
         toast({
           title: "Success",
           description: "Node deleted successfully",
@@ -111,6 +128,8 @@ export default function DashboardPage() {
       });
     } finally {
       setDeletingNode(null);
+      setShowDeleteDialog(false);
+      setNodeToDelete(null);
     }
   };
 
@@ -271,7 +290,7 @@ export default function DashboardPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDeleteNode(node.id)}
+                      onClick={() => handleDeleteNode(node)}
                       disabled={deletingNode === node.id}
                       className="text-destructive hover:text-destructive"
                     >
@@ -288,6 +307,44 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Node Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;{nodeToDelete?.display_name}&quot;? This action cannot be undone and will permanently remove the node and all its links.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteDialog(false);
+                setNodeToDelete(null);
+              }}
+              disabled={deletingNode === nodeToDelete?.id}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deletingNode === nodeToDelete?.id}
+            >
+              {deletingNode === nodeToDelete?.id ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                'Delete Node'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

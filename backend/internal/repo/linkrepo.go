@@ -224,25 +224,17 @@ func (r *LinkRepo) UpdateLinkOrder(ctx context.Context, linkID int64, newPositio
 		return tx.Commit()
 	}
 
-	newOrder := make([]int, len(links))
+	newLinks := make([]model.Link, len(links))
+	copy(newLinks, links)
 
-	for i := range links {
-		newOrder[i] = i
-	}
+	linkToMove := newLinks[currentIndex]
+	newLinks = append(newLinks[:currentIndex], newLinks[currentIndex+1:]...)
 
-	removed := newOrder[currentIndex]
-	copy(newOrder[currentIndex:], newOrder[currentIndex+1:])
-	newOrder = newOrder[:len(newOrder)-1]
+	newLinks = append(newLinks[:newPosition], append([]model.Link{linkToMove}, newLinks[newPosition:]...)...)
 
-	if newPosition > currentIndex {
-		newPosition--
-	}
-
-	newOrder = append(newOrder[:newPosition], append([]int{removed}, newOrder[newPosition:]...)...)
-
-	for i, linkItem := range links {
+	for i, linkItem := range newLinks {
 		updateQuery := `UPDATE links SET position = $1 WHERE id = $2`
-		_, err = tx.ExecContext(ctx, updateQuery, newOrder[i], linkItem.ID)
+		_, err = tx.ExecContext(ctx, updateQuery, i, linkItem.ID)
 		if err != nil {
 			return err
 		}

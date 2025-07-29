@@ -29,6 +29,7 @@ type Link struct {
 	CustomTitleColor              string `json:"custom_title_color" db:"custom_title_color"`
 	CustomDescriptionColorEnabled bool   `json:"custom_description_color_enabled" db:"custom_description_color_enabled"`
 	CustomDescriptionColor        string `json:"custom_description_color" db:"custom_description_color"`
+	MiniBackgroundEnabled         bool   `json:"mini_background_enabled" db:"mini_background_enabled"`
 }
 
 // ensures empty slices are serialized as [] instead of null

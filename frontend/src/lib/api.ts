@@ -194,9 +194,17 @@ class ApiClient {
     icon?: string;
     visible?: boolean;
     enabled?: boolean;
+    mini?: boolean;
     gradient_type?: string;
     gradient_angle?: number;
     color_stops?: Array<{ color: string; position: number }>;
+    custom_accent_color_enabled?: boolean;
+    custom_accent_color?: string;
+    custom_title_color_enabled?: boolean;
+    custom_title_color?: string;
+    custom_description_color_enabled?: boolean;
+    custom_description_color?: string;
+    mini_background_enabled?: boolean;
   }) {
     return this.request(`/nodes/api/${nodeId}/links`, {
       method: 'POST',
@@ -211,9 +219,17 @@ class ApiClient {
     icon?: string;
     visible?: boolean;
     enabled?: boolean;
+    mini?: boolean;
     gradient_type?: string;
     gradient_angle?: number;
     color_stops?: Array<{ color: string; position: number }>;
+    custom_accent_color_enabled?: boolean;
+    custom_accent_color?: string;
+    custom_title_color_enabled?: boolean;
+    custom_title_color?: string;
+    custom_description_color_enabled?: boolean;
+    custom_description_color?: string;
+    mini_background_enabled?: boolean;
   }) {
     return this.request(`/nodes/api/${nodeId}/links/${linkId}`, {
       method: 'PUT',

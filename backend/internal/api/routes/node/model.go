@@ -41,6 +41,7 @@ type CreateLinkRequest struct {
 	CustomTitleColor              string                   `json:"custom_title_color"`
 	CustomDescriptionColorEnabled *bool                    `json:"custom_description_color_enabled"`
 	CustomDescriptionColor        string                   `json:"custom_description_color"`
+	MiniBackgroundEnabled         *bool                    `json:"mini_background_enabled"`
 }
 
 type UpdateLinkRequest struct {
@@ -61,6 +62,7 @@ type UpdateLinkRequest struct {
 	CustomTitleColor              string                   `json:"custom_title_color"`
 	CustomDescriptionColorEnabled *bool                    `json:"custom_description_color_enabled"`
 	CustomDescriptionColor        string                   `json:"custom_description_color"`
+	MiniBackgroundEnabled         *bool                    `json:"mini_background_enabled"`
 }
 
 type CreateColorStopRequest struct {

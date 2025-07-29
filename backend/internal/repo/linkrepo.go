@@ -161,14 +161,14 @@ func (r *LinkRepo) UpdateLink(ctx context.Context, link *model.Link) error {
 		SET name = $1, display_name = $2, link = $3, description = $4, icon = $5, visible = $6, enabled = $7, mini = $8,
 		    gradient_type = $9, gradient_angle = $10, custom_accent_color_enabled = $11, custom_accent_color = $12, 
 		    custom_title_color_enabled = $13, custom_title_color = $14, custom_description_color_enabled = $15, 
-		    custom_description_color = $16, updated_at = $17
-		WHERE id = $18
+		    custom_description_color = $16, mini_background_enabled = $17, updated_at = $18
+		WHERE id = $19
 	`
 	_, err := r.db.ExecContext(ctx, query,
 		link.Name, link.DisplayName, link.Link, link.Description, link.Icon, link.Visible, link.Enabled, link.Mini,
 		link.GradientType, link.GradientAngle, link.CustomAccentColorEnabled, link.CustomAccentColor,
 		link.CustomTitleColorEnabled, link.CustomTitleColor, link.CustomDescriptionColorEnabled, link.CustomDescriptionColor,
-		time.Now().UTC().Unix(), link.ID)
+		link.MiniBackgroundEnabled, time.Now().UTC().Unix(), link.ID)
 	return err
 }
 

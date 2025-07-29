@@ -193,16 +193,29 @@ export default function PublicNode() {
                   return (
                     <div
                       key={link.id}
-                      className="w-12 h-12 rounded-full cursor-pointer transition-all duration-200 hover:scale-110 flex items-center justify-center bg-white/10 backdrop-blur-sm"
+                      className={`w-12 h-12 rounded-full cursor-pointer transition-all duration-200 hover:scale-110 flex items-center justify-center backdrop-blur-sm ${
+                        link.mini_background_enabled ? '' : 'bg-white/10'
+                      }`}
                       style={{
-                        boxShadow: node.text_shadows_enabled ? '0 4px 8px rgba(0,0,0,0.3)' : 'none'
+                        boxShadow: node.text_shadows_enabled ? '0 4px 8px rgba(0,0,0,0.3)' : 'none',
+                        ...(link.mini_background_enabled && {
+                          background: getGradientStyle(link).background || 'transparent'
+                        })
                       }}
                       onClick={() => handleLinkClick(link)}
                       title={link.display_name}
                     >
-                      {React.createElement(getIcon(link.icon), { 
-                        className: "h-6 w-6"
-                      })}
+                      <div
+                        style={{
+                          color: link.custom_accent_color_enabled && link.custom_accent_color 
+                            ? link.custom_accent_color 
+                            : node.accent_color || '#66CC66'
+                        }}
+                      >
+                        {React.createElement(getIcon(link.icon), { 
+                          className: "h-6 w-6"
+                        })}
+                      </div>
                     </div>
                   );
                 })}

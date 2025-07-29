@@ -43,6 +43,7 @@ interface LinkFormData {
   custom_title_color: string;
   custom_description_color_enabled: boolean;
   custom_description_color: string;
+  mini_background_enabled: boolean;
 }
 
 interface LinkEditorProps {
@@ -81,6 +82,7 @@ export default function LinkEditor({
     custom_title_color: initialData?.custom_title_color || '',
     custom_description_color_enabled: initialData?.custom_description_color_enabled ?? false,
     custom_description_color: initialData?.custom_description_color || '',
+    mini_background_enabled: initialData?.mini_background_enabled ?? false,
   });
 
   const [colorStops, setColorStops] = useState<FormColorStop[]>(
@@ -122,6 +124,7 @@ export default function LinkEditor({
         custom_title_color: initialData.custom_title_color || '',
         custom_description_color_enabled: initialData.custom_description_color_enabled ?? false,
         custom_description_color: initialData.custom_description_color || '',
+        mini_background_enabled: initialData.mini_background_enabled ?? false,
       });
       setColorStops(initialData.color_stops || []);
       setSelectedGradientType(initialData.gradient_type || 'solid');
@@ -144,6 +147,7 @@ export default function LinkEditor({
         custom_title_color: '',
         custom_description_color_enabled: false,
         custom_description_color: '',
+        mini_background_enabled: false,
       });
       setColorStops([]);
       setSelectedGradientType('solid');
@@ -208,6 +212,7 @@ export default function LinkEditor({
       custom_title_color: '',
       custom_description_color_enabled: false,
       custom_description_color: '',
+      mini_background_enabled: false,
     });
     setColorStops([]);
     setSelectedGradientType('solid');
@@ -318,6 +323,17 @@ export default function LinkEditor({
                   />
                   <Label htmlFor="link_mini">Mini (Icon Only)</Label>
                 </div>
+                {formData.mini && (
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="link_mini_background_enabled"
+                      checked={formData.mini_background_enabled}
+                      onChange={(e) => handleInputChange('mini_background_enabled', e.target.checked)}
+                    />
+                    <Label htmlFor="link_mini_background_enabled">Enable Background Fill</Label>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -471,8 +487,8 @@ export default function LinkEditor({
               </CollapsibleContent>
             </Collapsible>
 
-            {/* Fill/Gradient Section - Hidden when mini is enabled */}
-            {!formData.mini && (
+            {/* Fill/Gradient Section - Hidden when mini is enabled, unless mini background is enabled */}
+            {(!formData.mini || formData.mini_background_enabled) && (
               <Collapsible className="space-y-4">
                 <CollapsibleTrigger>
                   <div className="flex items-center">

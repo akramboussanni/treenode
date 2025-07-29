@@ -53,6 +53,7 @@ export interface Link {
   custom_title_color: string;
   custom_description_color_enabled: boolean;
   custom_description_color: string;
+  mini_background_enabled: boolean;
 }
 
 export interface ColorStop {
@@ -101,6 +102,7 @@ export interface CreateLinkRequest {
   custom_title_color?: string;
   custom_description_color_enabled?: boolean;
   custom_description_color?: string;
+  mini_background_enabled?: boolean;
 }
 
 export interface UpdateLinkRequest {
@@ -119,6 +121,7 @@ export interface UpdateLinkRequest {
   custom_title_color?: string;
   custom_description_color_enabled?: boolean;
   custom_description_color?: string;
+  mini_background_enabled?: boolean;
 }
 
 export interface LoginRequest {

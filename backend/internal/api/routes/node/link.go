@@ -91,6 +91,7 @@ func (nr *NodeRouter) HandleCreateLink(w http.ResponseWriter, r *http.Request) {
 		CustomTitleColor:              req.CustomTitleColor,
 		CustomDescriptionColorEnabled: req.CustomDescriptionColorEnabled != nil && *req.CustomDescriptionColorEnabled,
 		CustomDescriptionColor:        req.CustomDescriptionColor,
+		MiniBackgroundEnabled:         req.MiniBackgroundEnabled != nil && *req.MiniBackgroundEnabled,
 	}
 
 	err = nr.LinkRepo.CreateLink(r.Context(), link)
@@ -330,6 +331,9 @@ func (nr *NodeRouter) HandleUpdateLink(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.CustomDescriptionColor != "" {
 		link.CustomDescriptionColor = req.CustomDescriptionColor
+	}
+	if req.MiniBackgroundEnabled != nil {
+		link.MiniBackgroundEnabled = *req.MiniBackgroundEnabled
 	}
 
 	if len(req.ColorStops) > 0 {

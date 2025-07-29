@@ -819,11 +819,27 @@ export default function NodeManagementPage() {
                       <ThemeSelector
                         selectedTheme={watchNode('theme') || 'default'}
                         onThemeSelect={handleThemeSelect}
+                        onSaveChanges={() => handleUpdateNode(watchNode())}
                         className="bg-card border rounded-lg p-6"
                         themeColor={watchNode('theme_color') || '#ffffff'}
                         accentColor={watchNode('accent_color') || '#66CC66'}
                         backgroundColor={watchNode('background_color') || '#ffffff'}
                       />
+                    </div>
+                    
+                    {/* Theme Credits */}
+                    <div className="mt-4 p-3 bg-muted/50 rounded-lg border border-dashed">
+                      <p className="text-xs text-muted-foreground text-center">
+                        Most background themes were taken from {' '}
+                        <a 
+                          href="https://reactbits.dev" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline font-medium"
+                        >
+                          reactbits.dev
+                        </a>
+                      </p>
                     </div>
                   </div>
 

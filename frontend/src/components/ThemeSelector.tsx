@@ -6,6 +6,14 @@ import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 
 // Import all theme components
 import BallpitTheme from './themes/Ballpit';
@@ -179,6 +187,7 @@ const groupedThemes = themes.reduce((acc, theme) => {
 
 interface ThemeSelectorProps {
   onThemeSelect?: (themeId: string) => void;
+  onSaveChanges?: () => void;
   selectedTheme?: string;
   className?: string;
   themeColor?: string;
@@ -188,6 +197,7 @@ interface ThemeSelectorProps {
 
 export default function ThemeSelector({ 
   onThemeSelect, 
+  onSaveChanges,
   selectedTheme = 'ballpit',
   className = '',
   themeColor = '#ffffff',
@@ -196,10 +206,21 @@ export default function ThemeSelector({
 }: ThemeSelectorProps) {
   const [previewTheme, setPreviewTheme] = useState<string>(selectedTheme);
   const [themesCollapsed, setThemesCollapsed] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const handleThemeClick = useCallback((themeId: string) => {
     setPreviewTheme(themeId);
   }, []);
+
+  const handleSetTheme = useCallback(() => {
+    setShowConfirmDialog(true);
+  }, []);
+
+  const handleConfirmTheme = useCallback(() => {
+    onThemeSelect?.(previewTheme);
+    onSaveChanges?.();
+    setShowConfirmDialog(false);
+  }, [previewTheme, onThemeSelect, onSaveChanges]);
 
   const currentTheme = themes.find(t => t.id === previewTheme) || themes[0];
   const ThemeComponent = currentTheme.component;
@@ -249,7 +270,7 @@ export default function ThemeSelector({
               <button
                 className={`px-4 py-2 rounded bg-white/90 backdrop-blur-sm text-gray-900 font-semibold shadow-lg hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed border border-white/20`}
                 disabled={previewTheme === selectedTheme}
-                onClick={() => onThemeSelect?.(previewTheme)}
+                onClick={handleSetTheme}
                 type="button"
               >
                 {previewTheme === selectedTheme ? 'Selected' : 'Set Theme'}
@@ -315,6 +336,31 @@ export default function ThemeSelector({
           ))}
         </div>
       )}
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Theme Change</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to save changes and set the theme to &quot;{currentTheme.name}&quot;? This will update your node&apos;s appearance.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmTheme}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

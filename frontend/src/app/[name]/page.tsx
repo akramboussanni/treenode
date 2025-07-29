@@ -11,21 +11,7 @@ import { apiClient } from '@/lib/api';
 import { Node, Link as LinkType } from '@/types';
 import { getIcon } from '@/lib/icons';
 import { useToast } from '@/hooks/use-toast';
-import LoveTheme from '@/components/themes/LoveTheme';
-import RetroTerminal from '@/components/themes/RetroTerminal';
-import NeonCyber from '@/components/themes/NeonCyber';
-import NatureForest from '@/components/themes/NatureForest';
-import LiquidChrome from '@/components/themes/LiquidChrome';
-import Galaxy from '@/components/themes/Galaxy';
-import Iridescence from '@/components/themes/Iridescence';
-import Whirlwind from '@/components/themes/Whirlwind';
-import Lightning from '@/components/themes/Lightning';
-import DotGrid from '@/components/themes/DotGrid';
-import Threads from '@/components/themes/Threads';
-import Beams from '@/components/themes/Beams';
-import BallpitTheme from '@/components/themes/Ballpit';
-import Waves from '@/components/themes/Waves';
-import Dither from '@/components/themes/Dither';
+import ThemeRenderer from '@/components/themes/ThemeRegistry';
 
 // Helper function to generate gradient style
 const getGradientStyle = (link: LinkType): React.CSSProperties => {
@@ -163,8 +149,9 @@ export default function PublicNode() {
       style={{ backgroundColor: node.background_color }}
     >
       {/* Theme Background */}
-      {node.theme === 'love' && (
-        <LoveTheme
+      {node.theme && node.theme !== 'default' && (
+        <ThemeRenderer
+          themeName={node.theme}
           themeColor={node.theme_color}
           accentColor={node.accent_color}
           titleFontColor={node.title_font_color}
@@ -172,121 +159,6 @@ export default function PublicNode() {
           backgroundColor={node.background_color}
           mouseEffectsEnabled={node.mouse_effects_enabled}
           textShadowsEnabled={node.text_shadows_enabled}
-        />
-      )}
-      {node.theme === 'retro-terminal' && (
-        <RetroTerminal
-          accentColor={node.theme_color}
-          titleFontColor={node.title_font_color}
-          captionFontColor={node.caption_font_color}
-          backgroundColor={node.background_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-          textShadowsEnabled={node.text_shadows_enabled}
-        />
-      )}
-      {node.theme === 'neon-cyber' && (
-        <NeonCyber
-          themeColor={node.theme_color}
-          accentColor={node.accent_color}
-          titleFontColor={node.title_font_color}
-          captionFontColor={node.caption_font_color}
-          backgroundColor={node.background_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-          textShadowsEnabled={node.text_shadows_enabled}
-        />
-      )}
-      {node.theme === 'nature-forest' && (
-        <NatureForest
-          accentColor={node.theme_color}
-          titleFontColor={node.title_font_color}
-          captionFontColor={node.caption_font_color}
-          backgroundColor={node.background_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-          textShadowsEnabled={node.text_shadows_enabled}
-        />
-      )}
-      {node.theme === 'liquid-chrome' && (
-        <LiquidChrome
-          accentColor={node.theme_color}
-          titleFontColor={node.title_font_color}
-          captionFontColor={node.caption_font_color}
-          backgroundColor={node.background_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-          textShadowsEnabled={node.text_shadows_enabled}
-        />
-      )}
-      {node.theme === 'galaxy' && (
-        <Galaxy
-          accentColor={node.theme_color}
-          titleFontColor={node.title_font_color}
-          captionFontColor={node.caption_font_color}
-          backgroundColor={node.background_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-          textShadowsEnabled={node.text_shadows_enabled}
-        />
-      )}
-      {node.theme === 'ballpit' && (
-        <BallpitTheme
-          themeColor={node.theme_color}
-          accentColor={node.accent_color}
-          titleFontColor={node.title_font_color}
-          captionFontColor={node.caption_font_color}
-          backgroundColor={node.background_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-          textShadowsEnabled={node.text_shadows_enabled}
-        />
-      )}
-      {node.theme === 'iridescence' && (
-        <Iridescence
-          accentColor={node.theme_color}
-          titleFontColor={node.title_font_color}
-          captionFontColor={node.caption_font_color}
-          backgroundColor={node.background_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-          textShadowsEnabled={node.text_shadows_enabled}
-        />
-      )}
-      {node.theme === 'whirlwind' && (
-        <Whirlwind
-          accentColor={node.theme_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-        />
-      )}
-      {node.theme === 'lightning' && (
-        <Lightning
-          accentColor={node.theme_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-        />
-      )}
-      {node.theme === 'dotgrid' && (
-        <DotGrid
-          themeColor={node.theme_color}
-          accentColor={node.accent_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-        />
-      )}
-      {node.theme === 'threads' && (
-        <Threads
-          accentColor={node.theme_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-        />
-      )}
-      {node.theme === 'beams' && (
-        <Beams
-          accentColor={node.theme_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-        />
-      )}
-      {node.theme === 'waves' && (
-        <Waves
-          accentColor={node.theme_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
-        />
-      )}
-      {node.theme === 'dither' && (
-        <Dither
-          accentColor={node.theme_color}
-          mouseEffectsEnabled={node.mouse_effects_enabled}
         />
       )}
       <div className="container mx-auto px-4 py-8">

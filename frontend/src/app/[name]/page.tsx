@@ -242,7 +242,7 @@ export default function PublicNode() {
                   variant="secondary"
                   style={{ 
                     backgroundColor: node.accent_color || '#8B9A47',
-                    color: '#ffffff',
+                    color: '#F5F1E8',
                     textShadow: node.text_shadows_enabled ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
                     boxShadow: node.text_shadows_enabled ? '0 4px 8px rgba(0,0,0,0.2)' : 'none'
                   }}

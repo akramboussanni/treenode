@@ -62,7 +62,11 @@ func (nr *NodeRouter) HandleCreateNode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	displayName := user.Username + "'s Links"
-	backgroundColor := "#ffffff"
+	backgroundColor := "#F5F1E8"
+	accentColor := "#8B9A47"
+	titleFontColor := "#8B7355"
+	captionFontColor := "#666666"
+	themeColor := "#F5F1E8"
 	pageTitle := user.Username + "'s Page"
 
 	node := &model.Node{
@@ -72,11 +76,16 @@ func (nr *NodeRouter) HandleCreateNode(w http.ResponseWriter, r *http.Request) {
 		DisplayName:         displayName,
 		Description:         "",
 		BackgroundColor:     backgroundColor,
+		TitleFontColor:      titleFontColor,
+		CaptionFontColor:    captionFontColor,
+		AccentColor:         accentColor,
+		ThemeColor:          themeColor,
 		PageTitle:           pageTitle,
 		Domain:              "",
 		DomainVerified:      false,
 		MouseEffectsEnabled: true,
 		TextShadowsEnabled:  true,
+		ShowShareButton:     true,
 		CreatedAt:           time.Now().UTC().Unix(),
 		UpdatedAt:           time.Now().UTC().Unix(),
 	}

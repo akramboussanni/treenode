@@ -821,7 +821,7 @@ export default function NodeManagementPage() {
                         onThemeSelect={handleThemeSelect}
                         onSaveChanges={() => handleUpdateNode(watchNode())}
                         className="bg-card border rounded-lg p-6"
-                        themeColor={watchNode('theme_color') || '#ffffff'}
+                        themeColor={watchNode('theme_color') || '#F5F1E8'}
                         accentColor={watchNode('accent_color') || '#8B9A47'}
                         backgroundColor={watchNode('background_color') || '#F5F1E8'}
                       />

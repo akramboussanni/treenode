@@ -10,23 +10,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { 
   ArrowLeft, 
   Plus, 
   Globe, 
-  Edit, 
   Trash2,
   Eye,
   EyeOff,
   Check,
-  X,
-  Share2,
   Users,
   ChevronUp,
   ChevronDown,
   GripVertical,
-  LogOut
+  LogOut,
+  Settings,
+  Palette,
+  Sparkles,
+  Eye as EyeIcon,
+  ExternalLink,
+  XCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
@@ -37,10 +41,34 @@ import { Node, Link as LinkType } from '@/types';
 import { getIcon } from '@/lib/icons';
 import { config } from '@/config';
 import LinkEditor from '@/components/LinkEditor';
+import ThemeSelector from '@/components/ThemeSelector';
+
+// Helper function to get theme display name
+const getThemeDisplayName = (themeId: string): string => {
+  const themeMap: { [key: string]: string } = {
+    'default': 'Default',
+    'ballpit': 'Ballpit',
+    'love': 'Love Theme',
+    'threads': 'Threads',
+    'whirlwind': 'Whirlwind',
+    'dotgrid': 'Dot Grid',
+    'beams': 'Beams',
+    'waves': 'Waves',
+    'retro-terminal': 'Retro Terminal',
+    'neon-cyber': 'Neon Cyber',
+    'liquid-chrome': 'Liquid Chrome',
+    'nature-forest': 'Nature Forest',
+    'galaxy': 'Galaxy',
+    'iridescence': 'Iridescence',
+    'lightning': 'Lightning',
+    'dither': 'Dither'
+  };
+  return themeMap[themeId] || themeId;
+};
 
 const updateNodeSchema = z.object({
   subdomain_name: z.string().min(1, 'Subdomain name is required').regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens are allowed'),
-  display_name: z.string().min(1, 'Display name is required'),
+  display_name: z.string().min(1, 'Node title is required'),
   description: z.string().optional(),
   background_color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Must be a valid hex color'),
   title_font_color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Must be a valid hex color'),
@@ -52,7 +80,7 @@ const updateNodeSchema = z.object({
   mouse_effects_enabled: z.boolean().optional(),
   text_shadows_enabled: z.boolean().optional(),
   hide_powered_by: z.boolean().optional(),
-  page_title: z.string().min(1, 'Node title is required'),
+  page_title: z.string().min(1, 'Tab title is required'),
 });
 
 type UpdateNodeFormData = z.infer<typeof updateNodeSchema>;
@@ -67,7 +95,6 @@ export default function NodeManagementPage() {
   const [node, setNode] = useState<Node | null>(null);
   const [links, setLinks] = useState<LinkType[]>([]);
   const [loadingNode, setLoadingNode] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
   const [showLinkEditor, setShowLinkEditor] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkType | null>(null);
   const [deletingLink, setDeletingLink] = useState<string | null>(null);
@@ -180,7 +207,7 @@ export default function NodeManagementPage() {
   }, [user, nodeId, loadNode]);
 
   useEffect(() => {
-    if (node && !isEditing) {
+    if (node) {
       resetNode({
         subdomain_name: node.subdomain_name,
         display_name: node.display_name,
@@ -198,7 +225,7 @@ export default function NodeManagementPage() {
         hide_powered_by: node.hide_powered_by ?? false,
       });
     }
-  }, [node, isEditing, resetNode]);
+  }, [node, resetNode]);
 
   const loadCollaborators = async () => {
     try {
@@ -243,7 +270,6 @@ export default function NodeManagementPage() {
       
       if (response.data) {
         setNode(response.data as Node);
-        setIsEditing(false);
         toast({
           title: "Success",
           description: "Node updated successfully",
@@ -306,11 +332,6 @@ export default function NodeManagementPage() {
       const baseUrl = config.getBaseUrl();
       window.open(`${baseUrl}/${node.subdomain_name}`, '_blank');
     }
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    resetNode();
   };
 
   const handleCreateLink = async (data: { name: string; display_name: string; link: string; icon: string; visible: boolean; enabled: boolean; mini: boolean; gradient_type: string; gradient_angle: number; color_stops: Array<{ color: string; position: number }> }) => {
@@ -517,6 +538,14 @@ export default function NodeManagementPage() {
     setDraggedLinkId(null);
   };
 
+  const handleThemeSelect = (themeId: string) => {
+    setNodeValue('theme', themeId);
+    toast({
+      title: "Theme Updated",
+      description: `Theme "${getThemeDisplayName(themeId)}" has been applied to your node.`,
+    });
+  };
+
   if (loading || loadingNode) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -604,14 +633,6 @@ export default function NodeManagementPage() {
                     <Plus className="h-4 w-4 mr-2" />
                     Invite Collaborator
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={isEditing ? handleCancelEdit : () => setIsEditing(true)}
-                  >
-                    {isEditing ? <X className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
-                    {isEditing ? 'Cancel' : 'Edit'}
-                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -619,34 +640,32 @@ export default function NodeManagementPage() {
               <form onSubmit={handleSubmitNode(handleUpdateNode)} className="space-y-8">
                 {/* Basic Information Section */}
                 <div className="space-y-4">
-                  <div className="border-b pb-2">
-                    <h3 className="text-lg font-semibold text-cottage-brown">Basic Information</h3>
-                    <p className="text-sm text-muted-foreground">Configure the basic details of your node</p>
-                  </div>
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <Settings className="h-5 w-5 mr-2" />
+                    Basic Information
+                  </h3>
                   
+                  <div className="space-y-2">
+                    <Label htmlFor="subdomain_name">Subdomain Name</Label>
+                    <Input
+                      id="subdomain_name"
+                      {...registerNode('subdomain_name')}
+                      placeholder="my-awesome-links"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      This will be your URL: {config.getBaseUrl()}/{watchNode('subdomain_name') || '[subdomain-name]'}
+                    </p>
+                    {nodeErrors.subdomain_name && (
+                      <p className="text-sm text-destructive">{nodeErrors.subdomain_name.message}</p>
+                    )}
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="subdomain_name">Subdomain Name</Label>
-                      <Input
-                        id="subdomain_name"
-                        {...registerNode('subdomain_name')}
-                        disabled={!isEditing}
-                        placeholder="my-awesome-links"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        This will be your URL: {config.getBaseUrl()}/[subdomain-name]
-                      </p>
-                      {nodeErrors.subdomain_name && (
-                        <p className="text-sm text-destructive">{nodeErrors.subdomain_name.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="display_name">Display Name</Label>
+                      <Label htmlFor="display_name">Node Title</Label>
                       <Input
                         id="display_name"
                         {...registerNode('display_name')}
-                        disabled={!isEditing}
                       />
                       {nodeErrors.display_name && (
                         <p className="text-sm text-destructive">{nodeErrors.display_name.message}</p>
@@ -654,11 +673,10 @@ export default function NodeManagementPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="page_title">Node Title</Label>
+                      <Label htmlFor="page_title">Tab Title</Label>
                       <Input
                         id="page_title"
                         {...registerNode('page_title')}
-                        disabled={!isEditing}
                       />
                       {nodeErrors.page_title && (
                         <p className="text-sm text-destructive">{nodeErrors.page_title.message}</p>
@@ -671,7 +689,6 @@ export default function NodeManagementPage() {
                     <Input
                       id="description"
                       {...registerNode('description')}
-                      disabled={!isEditing}
                     />
                     {nodeErrors.description && (
                       <p className="text-sm text-destructive">{nodeErrors.description.message}</p>
@@ -679,12 +696,16 @@ export default function NodeManagementPage() {
                   </div>
                 </div>
 
-                {/* Color Scheme Section */}
-                <div className="space-y-4">
-                  <div className="border-b pb-2">
-                    <h3 className="text-lg font-semibold text-cottage-brown">Color Scheme</h3>
-                    <p className="text-sm text-muted-foreground">Customize the colors of your public page</p>
+                              {/* Color Scheme Section */}
+              <Collapsible className="space-y-4">
+                <CollapsibleTrigger>
+                  <div className="flex items-center">
+                    <Palette className="h-5 w-5 mr-2" />
+                    <span className="font-semibold">Color Scheme</span>
                   </div>
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
 
                   <div className="space-y-2">
                     <Label htmlFor="background_color">Background Color</Label>
@@ -694,12 +715,10 @@ export default function NodeManagementPage() {
                         type="color"
                         value={watchNode('background_color') || '#ffffff'}
                         onChange={(e) => handleColorChange('background_color', e.target.value)}
-                        disabled={!isEditing}
                         className="w-20 h-10"
                       />
                       <Input
                         {...registerNode('background_color')}
-                        disabled={!isEditing}
                         placeholder="#ffffff"
                       />
                     </div>
@@ -716,12 +735,10 @@ export default function NodeManagementPage() {
                         type="color"
                         value={watchNode('title_font_color') || '#8B7355'}
                         onChange={(e) => handleColorChange('title_font_color', e.target.value)}
-                        disabled={!isEditing}
                         className="w-20 h-10"
                       />
                       <Input
                         {...registerNode('title_font_color')}
-                        disabled={!isEditing}
                         placeholder="#8B7355"
                       />
                     </div>
@@ -738,12 +755,10 @@ export default function NodeManagementPage() {
                         type="color"
                         value={watchNode('caption_font_color') || '#666666'}
                         onChange={(e) => handleColorChange('caption_font_color', e.target.value)}
-                        disabled={!isEditing}
                         className="w-20 h-10"
                       />
                       <Input
                         {...registerNode('caption_font_color')}
-                        disabled={!isEditing}
                         placeholder="#666666"
                       />
                     </div>
@@ -760,12 +775,10 @@ export default function NodeManagementPage() {
                         type="color"
                         value={watchNode('accent_color') || '#66CC66'}
                         onChange={(e) => handleColorChange('accent_color', e.target.value)}
-                        disabled={!isEditing}
                         className="w-20 h-10"
                       />
                       <Input
                         {...registerNode('accent_color')}
-                        disabled={!isEditing}
                         placeholder="#66CC66"
                       />
                     </div>
@@ -773,35 +786,45 @@ export default function NodeManagementPage() {
                       <p className="text-sm text-destructive">{nodeErrors.accent_color.message}</p>
                     )}
                   </div>
-                </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-                {/* Theme & Effects Section */}
-                <div className="space-y-4">
-                  <div className="border-b pb-2">
-                    <h3 className="text-lg font-semibold text-cottage-brown">Theme & Effects</h3>
-                    <p className="text-sm text-muted-foreground">Configure the visual theme and interactive effects</p>
+                            {/* Theme & Effects Section */}
+              <Collapsible className="space-y-4">
+                <CollapsibleTrigger>
+                  <div className="flex items-center">
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    <span className="font-semibold">Theme & Effects</span>
                   </div>
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
 
                   <div className="space-y-2">
                     <Label htmlFor="theme">Theme</Label>
-                    <select
-                      {...registerNode('theme')}
-                      disabled={!isEditing}
-                      className="w-full p-2 border rounded-md"
-                    >
-                      <option value="default">Default</option>
-                      <option value="love">Love Theme</option>
-                      <option value="retro-terminal">Retro Terminal</option>
-                      <option value="neon-cyber">Neon Cyber</option>
-                      <option value="nature-forest">Nature Forest</option>
-                      <option value="liquid-chrome">Liquid Chrome</option>
-                      <option value="galaxy">Galaxy</option>
-                      <option value="ballpit">Ballpit</option>
-                      <option value="iridescence">Iridescence</option>
-                    </select>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        value={getThemeDisplayName(watchNode('theme') || 'default')}
+                        disabled={true}
+                        placeholder="Default"
+                        readOnly
+                      />
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Choose a theme to change the background of your public page.
                     </p>
+                    
+                    {/* Always show theme preview */}
+                    <div className="mt-4">
+                      <ThemeSelector
+                        selectedTheme={watchNode('theme') || 'default'}
+                        onThemeSelect={handleThemeSelect}
+                        className="bg-card border rounded-lg p-6"
+                        themeColor={watchNode('theme_color') || '#ffffff'}
+                        accentColor={watchNode('accent_color') || '#66CC66'}
+                        backgroundColor={watchNode('background_color') || '#ffffff'}
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -812,12 +835,10 @@ export default function NodeManagementPage() {
                         type="color"
                         value={watchNode('theme_color') || '#ffffff'}
                         onChange={(e) => handleColorChange('theme_color', e.target.value)}
-                        disabled={!isEditing}
                         className="w-20 h-10"
                       />
                       <Input
                         {...registerNode('theme_color')}
-                        disabled={!isEditing}
                         placeholder="#ffffff"
                       />
                     </div>
@@ -838,7 +859,7 @@ export default function NodeManagementPage() {
                             id="mouse_effects_enabled"
                             checked={watchNode('mouse_effects_enabled') ?? true}
                             onCheckedChange={(checked) => setNodeValue('mouse_effects_enabled', checked)}
-                            disabled={!isEditing}
+                            disabled={false}
                           />
                         </div>
                         <p className="text-xs text-muted-foreground">
@@ -855,21 +876,26 @@ export default function NodeManagementPage() {
                         id="text_shadows_enabled"
                         checked={watchNode('text_shadows_enabled') ?? false}
                         onCheckedChange={(checked) => setNodeValue('text_shadows_enabled', checked)}
-                        disabled={!isEditing}
+                        disabled={false}
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       When enabled, text will have shadow effects for better readability.
                     </p>
                   </div>
-                </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-                {/* Display Options Section */}
-                <div className="space-y-4">
-                  <div className="border-b pb-2">
-                    <h3 className="text-lg font-semibold text-cottage-brown">Display Options</h3>
-                    <p className="text-sm text-muted-foreground">Configure what visitors see on your public page</p>
+                            {/* Display Options Section */}
+              <Collapsible className="space-y-4">
+                <CollapsibleTrigger>
+                  <div className="flex items-center">
+                    <EyeIcon className="h-5 w-5 mr-2" />
+                    <span className="font-semibold">Display Options</span>
                   </div>
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -878,7 +904,7 @@ export default function NodeManagementPage() {
                         id="show_share_button"
                         checked={watchNode('show_share_button')}
                         onCheckedChange={(checked) => setNodeValue('show_share_button', checked)}
-                        disabled={!isEditing}
+                        disabled={false}
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -893,21 +919,20 @@ export default function NodeManagementPage() {
                         id="hide_powered_by"
                         checked={watchNode('hide_powered_by') ?? false}
                         onCheckedChange={(checked) => setNodeValue('hide_powered_by', checked)}
-                        disabled={!isEditing}
+                        disabled={false}
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       When enabled, the &quot;Powered by Treenode&quot; footer will be hidden on your public page.
                     </p>
                   </div>
-                </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-                {isEditing && (
-                  <Button type="submit" className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream">
-                    <Check className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                )}
+              <Button type="submit" className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream">
+                <Check className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
               </form>
             </CardContent>
           </Card>
@@ -938,6 +963,7 @@ export default function NodeManagementPage() {
                 initialData={editingLink || undefined}
                 isEditing={!!editingLink}
                 isSubmitting={updatingLink !== null}
+                nodeSubdomain={node?.subdomain_name}
               />
             )}
 
@@ -974,8 +1000,7 @@ export default function NodeManagementPage() {
                               onClick={() => window.open(link.link, '_blank')}
                               className="h-6 px-2"
                             >
-                              {/* ExternalLink icon was removed, using Share2 as a placeholder */}
-                              <Share2 className="h-3 w-3" />
+                              <ExternalLink className="h-3 w-3" />
                             </Button>
                           </div>
                           <div className="flex items-center space-x-2 mt-1">
@@ -1002,7 +1027,7 @@ export default function NodeManagementPage() {
                               </Badge>
                             ) : (
                               <Badge variant="destructive" className="text-xs">
-                                <X className="h-3 w-3 mr-1" />
+                                <XCircle className="h-3 w-3 mr-1" />
                                 Disabled
                               </Badge>
                             )}
@@ -1053,7 +1078,7 @@ export default function NodeManagementPage() {
                             setShowLinkEditor(true);
                           }}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Settings className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"

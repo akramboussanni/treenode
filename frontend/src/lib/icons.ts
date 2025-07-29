@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Twitter,
   Github,
@@ -89,19 +90,53 @@ import {
   Pi,
   Sigma,
   Omega,
-  // Add more icons as needed
 } from 'lucide-react';
 
-export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  // Social Media
+// Import Simple Icons
+import * as SimpleIcons from 'simple-icons';
+
+import { ICON_LIST } from './icon-list';
+
+// Type for Simple Icon data
+interface SimpleIconData {
+  title: string;
+  slug: string;
+  path: string;
+  source: string;
+  hex: string;
+}
+
+// Create a dynamic Simple Icon component factory
+const createSimpleIconComponent = (iconName: string) => {
+  const iconKey = `si${iconName.charAt(0).toUpperCase() + iconName.slice(1)}` as keyof typeof SimpleIcons;
+  const IconData = SimpleIcons[iconKey] as SimpleIconData | undefined;
+  
+  if (!IconData || !IconData.path) {
+    console.warn(`Simple Icon not found: ${iconName}`);
+    return null;
+  }
+
+  const SimpleIconComponent = ({ className }: { className?: string }) => {
+    return React.createElement('svg', {
+      className,
+      viewBox: '0 0 24 24',
+      fill: 'currentColor',
+      dangerouslySetInnerHTML: { __html: IconData.path }
+    });
+  };
+
+  SimpleIconComponent.displayName = `SimpleIcon_${iconName}`;
+  return SimpleIconComponent;
+};
+
+// Lucide icons mapping - automatically generated
+const lucideIcons = {
   twitter: Twitter,
   github: Github,
   linkedin: Linkedin,
   instagram: Instagram,
   youtube: Youtube,
   facebook: Facebook,
-  
-  // General
   globe: Globe,
   mail: Mail,
   phone: Phone,
@@ -114,8 +149,6 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   settings: Settings,
   link: Link,
   externalLink: ExternalLink,
-  
-  // Actions
   download: Download,
   upload: Upload,
   share: Share2,
@@ -126,8 +159,6 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   minus: Minus,
   check: Check,
   x: X,
-  
-  // UI
   alertCircle: AlertCircle,
   info: Info,
   helpCircle: HelpCircle,
@@ -137,27 +168,19 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   list: List,
   eye: Eye,
   eyeOff: EyeOff,
-  
-  // Security
   lock: Lock,
   unlock: Unlock,
   key: Key,
   shield: Shield,
-  
-  // Media
   camera: Camera,
   image: Image,
   video: Video,
   music: Music,
-  
-  // Files
   file: File,
   folder: Folder,
   database: Database,
   server: Server,
   cloud: Cloud,
-  
-  // Technology
   wifi: Wifi,
   bluetooth: Bluetooth,
   smartphone: Smartphone,
@@ -169,15 +192,11 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   mouse: Mouse,
   headphones: Headphones,
   speaker: Speaker,
-  
-  // Gaming
   gamepad: Gamepad2,
   puzzle: Puzzle,
   trophy: Trophy,
   medal: Medal,
   award: Award,
-  
-  // Commerce
   gift: Gift,
   package: Package,
   shoppingCart: ShoppingCart,
@@ -185,15 +204,11 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   dollarSign: DollarSign,
   euro: Euro,
   bitcoin: Bitcoin,
-  
-  // Analytics
   trendingUp: TrendingUp,
   trendingDown: TrendingDown,
   barChart: BarChart3,
   pieChart: PieChart,
   activity: Activity,
-  
-  // Symbols
   zap: Zap,
   target: Target,
   flag: Flag,
@@ -208,10 +223,123 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   omega: Omega,
 };
 
+// Simple Icons mapping - these are the ones that need special handling
+const simpleIconMappings = {
+  tiktok: 'tiktok',
+  discord: 'discord',
+  twitch: 'twitch',
+  reddit: 'reddit',
+  snapchat: 'snapchat',
+  whatsapp: 'whatsapp',
+  telegram: 'telegram',
+  spotify: 'spotify',
+  pinterest: 'pinterest',
+  tumblr: 'tumblr',
+  vimeo: 'vimeo',
+  dailymotion: 'dailymotion',
+  vk: 'vk',
+  wechat: 'wechat',
+  line: 'line',
+  kakao: 'kakao',
+  naver: 'naver',
+  stackoverflow: 'stackoverflow',
+  medium: 'medium',
+  hashnode: 'hashnode',
+  substack: 'substack',
+  notion: 'notion',
+  figma: 'figma',
+  slack: 'slack',
+  zoom: 'zoom',
+  dropbox: 'dropbox',
+  googledrive: 'googledrive',
+  box: 'box',
+  evernote: 'evernote',
+  trello: 'trello',
+  asana: 'asana',
+  jira: 'jira',
+  confluence: 'confluence',
+  bitbucket: 'bitbucket',
+  gitlab: 'gitlab',
+  docker: 'docker',
+  kubernetes: 'kubernetes',
+  heroku: 'heroku',
+  vercel: 'vercel',
+  netlify: 'netlify',
+  cloudflare: 'cloudflare',
+  digitalocean: 'digitalocean',
+  vultr: 'vultr',
+  stripe: 'stripe',
+  paypal: 'paypal',
+  square: 'square',
+  shopify: 'shopify',
+  woo: 'woo',
+  prestashop: 'prestashop',
+  wordpress: 'wordpress',
+  drupal: 'drupal',
+  joomla: 'joomla',
+  wix: 'wix',
+  squarespace: 'squarespace',
+  webflow: 'webflow',
+  zapier: 'zapier',
+  ifttt: 'ifttt',
+  make: 'make',
+  n8n: 'n8n',
+  nodered: 'nodered',
+  homeassistant: 'homeassistant',
+  openhab: 'openhab',
+  homebridge: 'homebridge',
+  tasmota: 'tasmota',
+  esphome: 'esphome',
+  arduino: 'arduino',
+  raspberrypi: 'raspberrypi',
+  arm: 'arm',
+  intel: 'intel',
+  amd: 'amd',
+  nvidia: 'nvidia',
+  qualcomm: 'qualcomm',
+  mediatek: 'mediatek',
+  broadcom: 'broadcom',
+  stmicroelectronics: 'stmicroelectronics',
+  nxp: 'nxp',
+  samsung: 'samsung',
+  lg: 'lg',
+  sony: 'sony',
+  sharp: 'sharp',
+  toshiba: 'toshiba',
+  hitachi: 'hitachi',
+  mitsubishi: 'mitsubishi',
+  fujitsu: 'fujitsu',
+  nec: 'nec',
+  epson: 'epson',
+  hp: 'hp',
+  dell: 'dell',
+  lenovo: 'lenovo',
+  asus: 'asus',
+  acer: 'acer',
+  msi: 'msi',
+  corsair: 'corsair',
+  coolermaster: 'coolermaster',
+  nzxt: 'nzxt',
+};
+
+// Build the icon map dynamically
+export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  // Add Lucide icons
+  ...lucideIcons,
+  
+  // Add Simple Icons dynamically
+  ...Object.fromEntries(
+    Object.entries(simpleIconMappings).map(([key, iconName]) => [
+      key,
+      createSimpleIconComponent(iconName)
+    ]).filter(([, component]) => component !== null)
+  ),
+};
+
 export function getIcon(iconId: string) {
   return iconMap[iconId] || Globe; // Default to Globe if icon not found
 }
 
 export function getIconList() {
-  return Object.keys(iconMap);
+  return ICON_LIST;
 } 

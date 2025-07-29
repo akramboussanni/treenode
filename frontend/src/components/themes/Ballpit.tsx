@@ -1,27 +1,37 @@
-import React, { useEffect, useRef } from 'react';
-import * as THREE from 'three';
+'use client';
+
+import React, { useRef, useEffect } from "react";
 import {
   Clock,
   PerspectiveCamera,
-  OrthographicCamera,
   Scene,
   WebGLRenderer,
-  SRGBColorSpace,
   WebGLRendererParameters,
-  Color,
+  SRGBColorSpace,
+  MathUtils,
+  Vector2,
   Vector3,
-  InstancedMesh,
   MeshPhysicalMaterial,
+  ShaderChunk,
+  Color,
+  Object3D,
+  InstancedMesh,
+  PMREMGenerator,
+  SphereGeometry,
   AmbientLight,
   PointLight,
-} from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-
+  ACESFilmicToneMapping,
+  Raycaster,
+  Plane,
+  MeshPhysicalMaterialParameters,
+} from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { ThemeProps } from './types';
 interface XConfig {
   canvas?: HTMLCanvasElement;
   id?: string;
   rendererOptions?: Partial<WebGLRendererParameters>;
-  size?: 'parent' | { width: number; height: number };
+  size?: "parent" | { width: number; height: number };
 }
 
 interface SizeData {
@@ -33,15 +43,9 @@ interface SizeData {
   pixelRatio: number;
 }
 
-// Simplify postprocessing interface
-interface PostProcessing {
-  setSize: (width: number, height: number) => void;
-  dispose: () => void;
-}
-
 class X {
   #config: XConfig;
-  #postprocessing?: PostProcessing;
+  #postprocessing: unknown;
   #resizeObserver?: ResizeObserver;
   #intersectionObserver?: IntersectionObserver;
   #resizeTimer?: number;
@@ -52,7 +56,7 @@ class X {
   #isVisible: boolean = false;
 
   canvas!: HTMLCanvasElement;
-  camera!: PerspectiveCamera | OrthographicCamera;
+  camera!: PerspectiveCamera;
   cameraMinAspect?: number;
   cameraMaxAspect?: number;
   cameraFov!: number;
@@ -60,11 +64,19 @@ class X {
   minPixelRatio?: number;
   scene!: Scene;
   renderer!: WebGLRenderer;
-  size: SizeData = { width: 0, height: 0, wWidth: 0, wHeight: 0, ratio: 0, pixelRatio: 0 };
+  size: SizeData = {
+    width: 0,
+    height: 0,
+    wWidth: 0,
+    wHeight: 0,
+    ratio: 0,
+    pixelRatio: 0,
+  };
 
   render: () => void = this.#render.bind(this);
-  onBeforeRender: (_state: { elapsed: number; delta: number }) => void = () => {};
-  onAfterRender: (_state: { elapsed: number; delta: number }) => void = () => {};
+  onBeforeRender: (state: { elapsed: number; delta: number }) => void =
+    () => {};
+  onAfterRender: (state: { elapsed: number; delta: number }) => void = () => {};
   onAfterResize: (size: SizeData) => void = () => {};
   isDisposed: boolean = false;
 
@@ -79,7 +91,7 @@ class X {
 
   #initCamera() {
     this.camera = new PerspectiveCamera();
-    this.cameraFov = (this.camera as PerspectiveCamera).fov;
+    this.cameraFov = this.camera.fov;
   }
 
   #initScene() {
@@ -87,30 +99,45 @@ class X {
   }
 
   #initRenderer() {
-    if (this.#config.canvas) this.canvas = this.#config.canvas;
-    else if (this.#config.id) {
+    if (this.#config.canvas) {
+      this.canvas = this.#config.canvas;
+    } else if (this.#config.id) {
       const elem = document.getElementById(this.#config.id);
-      if (elem instanceof HTMLCanvasElement) this.canvas = elem;
-      else console.error('Three: Missing canvas or id parameter');
-    } else console.error('Three: Missing canvas or id parameter');
-
-    this.canvas.style.display = 'block';
-    const opts: WebGLRendererParameters = { canvas: this.canvas, powerPreference: 'high-performance', ...(this.#config.rendererOptions ?? {}) };
-    this.renderer = new WebGLRenderer(opts);
+      if (elem instanceof HTMLCanvasElement) {
+        this.canvas = elem;
+      } else {
+        console.error("Three: Missing canvas or id parameter");
+      }
+    } else {
+      console.error("Three: Missing canvas or id parameter");
+    }
+    this.canvas!.style.display = "block";
+    const rendererOptions: WebGLRendererParameters = {
+      canvas: this.canvas,
+      powerPreference: "high-performance",
+      ...(this.#config.rendererOptions ?? {}),
+    };
+    this.renderer = new WebGLRenderer(rendererOptions);
     this.renderer.outputColorSpace = SRGBColorSpace;
   }
 
   #initObservers() {
     if (!(this.#config.size instanceof Object)) {
-      window.addEventListener('resize', this.#onResize.bind(this));
-      if (this.#config.size === 'parent' && this.canvas.parentNode) {
+      window.addEventListener("resize", this.#onResize.bind(this));
+      if (this.#config.size === "parent" && this.canvas.parentNode) {
         this.#resizeObserver = new ResizeObserver(this.#onResize.bind(this));
         this.#resizeObserver.observe(this.canvas.parentNode as Element);
       }
     }
-    this.#intersectionObserver = new IntersectionObserver(this.#onIntersection.bind(this), { root: null, rootMargin: '0px', threshold: 0 });
+    this.#intersectionObserver = new IntersectionObserver(
+      this.#onIntersection.bind(this),
+      { root: null, rootMargin: "0px", threshold: 0 }
+    );
     this.#intersectionObserver.observe(this.canvas);
-    document.addEventListener('visibilitychange', this.#onVisibilityChange.bind(this));
+    document.addEventListener(
+      "visibilitychange",
+      this.#onVisibilityChange.bind(this)
+    );
   }
 
   #onResize() {
@@ -120,8 +147,10 @@ class X {
 
   resize() {
     let w: number, h: number;
-    if (this.#config.size instanceof Object) ({ width: w, height: h } = this.#config.size);
-    else if (this.#config.size === 'parent' && this.canvas.parentNode) {
+    if (this.#config.size instanceof Object) {
+      w = this.#config.size.width;
+      h = this.#config.size.height;
+    } else if (this.#config.size === "parent" && this.canvas.parentNode) {
       w = (this.canvas.parentNode as HTMLElement).offsetWidth;
       h = (this.canvas.parentNode as HTMLElement).offsetHeight;
     } else {
@@ -137,30 +166,37 @@ class X {
   }
 
   #updateCamera() {
-    if ('isPerspectiveCamera' in this.camera && (this.camera as PerspectiveCamera).isPerspectiveCamera) {
-      const cam = this.camera as PerspectiveCamera;
-      cam.aspect = this.size.width / this.size.height;
-      if (this.cameraMinAspect && cam.aspect < this.cameraMinAspect) this.#adjustFov(this.cameraMinAspect);
-      else if (this.cameraMaxAspect && cam.aspect > this.cameraMaxAspect) this.#adjustFov(this.cameraMaxAspect);
-      else cam.fov = this.cameraFov;
-      cam.updateProjectionMatrix();
+    this.camera.aspect = this.size.width / this.size.height;
+    if (this.camera.isPerspectiveCamera && this.cameraFov) {
+      if (this.cameraMinAspect && this.camera.aspect < this.cameraMinAspect) {
+        this.#adjustFov(this.cameraMinAspect);
+      } else if (
+        this.cameraMaxAspect &&
+        this.camera.aspect > this.cameraMaxAspect
+      ) {
+        this.#adjustFov(this.cameraMaxAspect);
+      } else {
+        this.camera.fov = this.cameraFov;
+      }
     }
+    this.camera.updateProjectionMatrix();
     this.updateWorldSize();
   }
 
   #adjustFov(aspect: number) {
-    const tanFov = Math.tan(THREE.MathUtils.degToRad(this.cameraFov / 2));
-    const newTan = tanFov / ((this.camera as PerspectiveCamera).aspect / aspect);
-    (this.camera as PerspectiveCamera).fov = 2 * THREE.MathUtils.radToDeg(Math.atan(newTan));
+    const tanFov = Math.tan(MathUtils.degToRad(this.cameraFov / 2));
+    const newTan = tanFov / (this.camera.aspect / aspect);
+    this.camera.fov = 2 * MathUtils.radToDeg(Math.atan(newTan));
   }
 
   updateWorldSize() {
-    if ('isPerspectiveCamera' in this.camera && (this.camera as PerspectiveCamera).isPerspectiveCamera) {
-      const fovRad = ((this.camera as PerspectiveCamera).fov * Math.PI) / 180;
-      this.size.wHeight = 2 * Math.tan(fovRad / 2) * this.camera.position.length();
+    if (this.camera.isPerspectiveCamera) {
+      const fovRad = (this.camera.fov * Math.PI) / 180;
+      this.size.wHeight =
+        2 * Math.tan(fovRad / 2) * this.camera.position.length();
       this.size.wWidth = this.size.wHeight * this.camera.aspect;
-    } else if ('isOrthographicCamera' in this.camera && (this.camera as OrthographicCamera).isOrthographicCamera) {
-      const cam = this.camera as OrthographicCamera;
+    } else if ((this.camera as unknown as { isOrthographicCamera: boolean }).isOrthographicCamera) {
+      const cam = this.camera as unknown as { top: number; bottom: number; right: number; left: number };
       this.size.wHeight = cam.top - cam.bottom;
       this.size.wWidth = cam.right - cam.left;
     }
@@ -168,12 +204,13 @@ class X {
 
   #updateRenderer() {
     this.renderer.setSize(this.size.width, this.size.height);
-    if (this.#postprocessing) {
-      this.#postprocessing.setSize(this.size.width, this.size.height);
-    }
+    (this.#postprocessing as { setSize?: (width: number, height: number) => void })?.setSize?.(this.size.width, this.size.height);
     let pr = window.devicePixelRatio;
-    if (this.maxPixelRatio && pr > this.maxPixelRatio) pr = this.maxPixelRatio;
-    else if (this.minPixelRatio && pr < this.minPixelRatio) pr = this.minPixelRatio;
+    if (this.maxPixelRatio && pr > this.maxPixelRatio) {
+      pr = this.maxPixelRatio;
+    } else if (this.minPixelRatio && pr < this.minPixelRatio) {
+      pr = this.minPixelRatio;
+    }
     this.renderer.setPixelRatio(pr);
     this.size.pixelRatio = pr;
   }
@@ -181,8 +218,9 @@ class X {
   get postprocessing() {
     return this.#postprocessing;
   }
-  set postprocessing(pp: PostProcessing | undefined) {
-    this.#postprocessing = pp;
+  set postprocessing(value: unknown) {
+    this.#postprocessing = value;
+    this.render = (value as { render: () => void }).render.bind(value);
   }
 
   #onIntersection(entries: IntersectionObserverEntry[]) {
@@ -195,11 +233,12 @@ class X {
   }
 
   #onVisibilityChange() {
-    if (!this.#isAnimating) return;
-    if (document.hidden) {
-      this.#stopAnimation();
-    } else {
-      this.#startAnimation();
+    if (this.#isAnimating) {
+      if (document.hidden) {
+        this.#stopAnimation();
+      } else {
+        this.#startAnimation();
+      }
     }
   }
 
@@ -232,59 +271,47 @@ class X {
 
   clear() {
     this.scene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) {
-        // dispose materials
-        const materials = (obj as THREE.Mesh).material;
-        const disposeMaterial = (mat: unknown) => {
-          if (typeof mat === 'object' && mat !== null) {
-            const m = mat as { [key: string]: unknown; dispose?: () => void };
-            for (const key of Object.keys(m)) {
-              const sub = m[key];
-              if (
-                sub &&
-                typeof (sub as { dispose?: unknown }).dispose === 'function'
-              ) {
-                (sub as { dispose(): void }).dispose();
-              }
-            }
-            if (typeof m.dispose === 'function') {
-              m.dispose();
-            }
+      if (
+        (obj as unknown as { isMesh: boolean }).isMesh &&
+        typeof (obj as unknown as { material: { [key: string]: unknown } }).material === "object" &&
+        (obj as unknown as { material: { [key: string]: unknown } }).material !== null
+      ) {
+        Object.keys((obj as unknown as { material: { [key: string]: unknown } }).material).forEach((key) => {
+          const matProp = (obj as unknown as { material: { [key: string]: unknown } }).material[key];
+          if (
+            matProp &&
+            typeof matProp === "object" &&
+            typeof (matProp as { dispose: () => void }).dispose === "function"
+          ) {
+            (matProp as { dispose: () => void }).dispose();
           }
-        };
-        if (Array.isArray(materials)) {
-          materials.forEach(disposeMaterial);
-        } else {
-          disposeMaterial(materials as unknown);
-        }
-        (obj as THREE.Mesh).geometry.dispose();
+        });
+        (obj as unknown as { material: { dispose: () => void } }).material.dispose();
+        (obj as unknown as { geometry: { dispose: () => void } }).geometry.dispose();
       }
     });
-  
     this.scene.clear();
   }
-  
 
   dispose() {
     this.#onResizeCleanup();
     this.#stopAnimation();
     this.clear();
-    this.#postprocessing?.dispose();
+    (this.#postprocessing as { dispose?: () => void })?.dispose?.();
     this.renderer.dispose();
     this.isDisposed = true;
   }
 
   #onResizeCleanup() {
-    window.removeEventListener('resize', this.#onResize.bind(this));
+    window.removeEventListener("resize", this.#onResize.bind(this));
     this.#resizeObserver?.disconnect();
     this.#intersectionObserver?.disconnect();
     document.removeEventListener(
-      'visibilitychange',
+      "visibilitychange",
       this.#onVisibilityChange.bind(this)
     );
   }
 }
-
 
 interface WConfig {
   count: number;
@@ -324,9 +351,9 @@ class W {
     this.center.toArray(positionData, 0);
     for (let i = 1; i < config.count; i++) {
       const idx = 3 * i;
-      positionData[idx] = THREE.MathUtils.randFloatSpread(2 * config.maxX);
-      positionData[idx + 1] = THREE.MathUtils.randFloatSpread(2 * config.maxY);
-      positionData[idx + 2] = THREE.MathUtils.randFloatSpread(2 * config.maxZ);
+      positionData[idx] = MathUtils.randFloatSpread(2 * config.maxX);
+      positionData[idx + 1] = MathUtils.randFloatSpread(2 * config.maxY);
+      positionData[idx + 2] = MathUtils.randFloatSpread(2 * config.maxZ);
     }
   }
 
@@ -334,7 +361,7 @@ class W {
     const { config, sizeData } = this;
     sizeData[0] = config.size0;
     for (let i = 1; i < config.count; i++) {
-      sizeData[i] = THREE.MathUtils.randFloat(config.minSize, config.maxSize);
+      sizeData[i] = MathUtils.randFloat(config.minSize, config.maxSize);
     }
   }
 
@@ -426,27 +453,62 @@ class W {
     }
   }
 }
-
 class Y extends MeshPhysicalMaterial {
   uniforms: { [key: string]: { value: unknown } } = {
-    time: { value: 0 },
-    color: { value: new Color() },
+    thicknessDistortion: { value: 0.1 },
+    thicknessAmbient: { value: 0 },
+    thicknessAttenuation: { value: 0.1 },
+    thicknessPower: { value: 2 },
+    thicknessScale: { value: 10 },
   };
+  defines: { [key: string]: string } = {};
 
-  onBeforeCompile2?: (
-    shaderUniforms: Record<string, unknown>,
-    renderer: WebGLRenderer
-  ) => void;
-
-  constructor(params: Record<string, unknown>) {
+  constructor(params: MeshPhysicalMaterialParameters) {
     super(params);
-    // Wrap the hook in the correct signature
-    this.onBeforeCompile = (shader, renderer) => {
-      if (this.onBeforeCompile2) {
-        this.onBeforeCompile2(shader.uniforms, renderer);
-      }
+    this.defines = { USE_UV: "" };
+    this.onBeforeCompile = (shader) => {
+      Object.assign(shader.uniforms, this.uniforms);
+      shader.fragmentShader = `
+        uniform float thicknessPower;
+        uniform float thicknessScale;
+        uniform float thicknessDistortion;
+        uniform float thicknessAmbient;
+        uniform float thicknessAttenuation;
+      ` + shader.fragmentShader;
+
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "void main() {",
+        `
+        void RE_Direct_Scattering(const in IncidentLight directLight, const in vec2 uv, const in vec3 geometryPosition, const in vec3 geometryNormal, const in vec3 geometryViewDir, const in vec3 geometryClearcoatNormal, inout ReflectedLight reflectedLight) {
+          vec3 scatteringHalf = normalize(directLight.direction + (geometryNormal * thicknessDistortion));
+          float scatteringDot = pow(saturate(dot(geometryViewDir, -scatteringHalf)), thicknessPower) * thicknessScale;
+          #ifdef USE_COLOR
+            vec3 scatteringIllu = (scatteringDot + thicknessAmbient) * vColor;
+          #else
+            vec3 scatteringIllu = (scatteringDot + thicknessAmbient) * diffuse;
+          #endif
+          reflectedLight.directDiffuse += scatteringIllu * thicknessAttenuation * directLight.color;
+        }
+
+        void main() {
+        `
+      );
+
+      const lightsChunk = ShaderChunk.lights_fragment_begin.replaceAll(
+        "RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );",
+        `
+          RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );
+          RE_Direct_Scattering(directLight, vUv, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, reflectedLight);
+        `
+      );
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <lights_fragment_begin>",
+        lightsChunk
+      );
+      if (this.onBeforeCompile2) this.onBeforeCompile2(shader);
     };
   }
+  onBeforeCompile2?: (shader: unknown) => void;
 }
 
 const XConfig = {
@@ -475,14 +537,14 @@ const XConfig = {
   followCursor: true,
 };
 
-const U = new THREE.Object3D();
+const U = new Object3D();
 
 let globalPointerActive = false;
-const pointerPosition = new THREE.Vector2();
+const pointerPosition = new Vector2();
 
 interface PointerData {
-  position: THREE.Vector2;
-  nPosition: THREE.Vector2;
+  position: Vector2;
+  nPosition: Vector2;
   hover: boolean;
   onEnter: (data: PointerData) => void;
   onMove: (data: PointerData) => void;
@@ -497,8 +559,8 @@ function createPointerData(
   options: Partial<PointerData> & { domElement: HTMLElement }
 ): PointerData {
   const defaultData: PointerData = {
-    position: new THREE.Vector2(),
-    nPosition: new THREE.Vector2(),
+    position: new Vector2(),
+    nPosition: new Vector2(),
     hover: false,
     onEnter: () => {},
     onMove: () => {},
@@ -607,9 +669,9 @@ class Z extends InstancedMesh {
   constructor(renderer: WebGLRenderer, params: Partial<typeof XConfig> = {}) {
     const config = { ...XConfig, ...params };
     const roomEnv = new RoomEnvironment();
-    const pmrem = new THREE.PMREMGenerator(renderer);
+    const pmrem = new PMREMGenerator(renderer);
     const envTexture = pmrem.fromScene(roomEnv).texture;
-    const geometry = new THREE.SphereGeometry();
+    const geometry = new SphereGeometry();
     const material = new Y({ envMap: envTexture, ...config.materialParams });
     material.envMapRotation.x = -Math.PI / 2;
     super(geometry, material, config.count);
@@ -633,7 +695,7 @@ class Z extends InstancedMesh {
   }
 
   setColors(colors: number[]) {
-    if (Array.isArray(colors) && colors.length > 1) {
+    if (Array.isArray(colors) && colors.length > 0) {
       const colorUtils = (function (colorsArr: number[]) {
         let baseColors: number[] = colorsArr;
         let colorObjects: Color[] = [];
@@ -649,6 +711,9 @@ class Z extends InstancedMesh {
             });
           },
           getColorAt: (ratio: number, out: Color = new Color()) => {
+            if (baseColors.length === 1) {
+              return colorObjects[0].clone();
+            }
             const clamped = Math.max(0, Math.min(1, ratio));
             const scaled = clamped * (baseColors.length - 1);
             const idx = Math.floor(scaled);
@@ -702,7 +767,7 @@ interface CreateBallpitReturn {
 
 function createBallpit(
   canvas: HTMLCanvasElement,
-  config: Record<string, unknown> = {}
+  config: unknown = {}
 ): CreateBallpitReturn {
   const threeInstance = new X({
     canvas,
@@ -710,14 +775,14 @@ function createBallpit(
     rendererOptions: { antialias: true, alpha: true },
   });
   let spheres: Z;
-  threeInstance.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  threeInstance.renderer.toneMapping = ACESFilmicToneMapping;
   threeInstance.camera.position.set(0, 0, 20);
   threeInstance.camera.lookAt(0, 0, 0);
   threeInstance.cameraMaxAspect = 1.5;
   threeInstance.resize();
   initialize(config);
-  const raycaster = new THREE.Raycaster();
-  const plane = new THREE.Plane(new Vector3(0, 0, 1), 0);
+  const raycaster = new Raycaster();
+  const plane = new Plane(new Vector3(0, 0, 1), 0);
   const intersectionPoint = new Vector3();
   let isPaused = false;
   const pointerData = createPointerData({
@@ -733,12 +798,12 @@ function createBallpit(
       spheres.config.controlSphere0 = false;
     },
   });
-  function initialize(cfg: Record<string, unknown>) {
+  function initialize(cfg: unknown) {
     if (spheres) {
       threeInstance.clear();
       threeInstance.scene.remove(spheres);
     }
-    spheres = new Z(threeInstance.renderer, cfg);
+    spheres = new Z(threeInstance.renderer, cfg as Partial<typeof XConfig>);
     threeInstance.scene.add(spheres);
   }
   threeInstance.onBeforeRender = (deltaInfo) => {
@@ -800,4 +865,35 @@ const Ballpit: React.FC<BallpitProps> = ({
   return <canvas className={`${className} w-full h-full`} ref={canvasRef} />;
 };
 
-export default Ballpit; 
+export default function BallpitTheme({ 
+  themeColor = '#4f46e5',
+  previewMode = false
+}: ThemeProps) {
+  // Convert hex to RGB
+  const hexToRgb = (hex: string): number => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return 0x4f46e5; // Default purple
+    
+    return parseInt(result[1] + result[2] + result[3], 16);
+  };
+
+  return (
+    <div className={`${previewMode ? 'absolute inset-0' : 'fixed inset-0 z-0'} w-full h-full`}>
+    <Ballpit
+        followCursor={false}
+        colors={[hexToRgb(themeColor)]}
+        count={30}
+      gravity={0.1}
+        friction={0.998}
+        wallBounce={0.9}
+        maxVelocity={0.15}
+        minSize={0.8}
+        maxSize={1.2}
+        size0={1.0}
+        maxX={10}
+        maxY={8}
+        maxZ={0}
+      />
+    </div>
+  );
+} 

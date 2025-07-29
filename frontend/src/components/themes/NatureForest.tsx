@@ -20,7 +20,8 @@ const LEAF_COUNT = 20;
 export default function NatureForest({ 
   accentColor = '#4ade80', 
   backgroundColor = '#f0fdf4',
-  mouseEffectsEnabled = true
+  mouseEffectsEnabled = true,
+  previewMode = false
 }: ThemeProps) {
   const [leaves, setLeaves] = useState<Leaf[]>([]);
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -99,7 +100,7 @@ export default function NatureForest({
 
   return (
     <div 
-      className="fixed inset-0 z-0 nature-forest-bg"
+      className={`${previewMode ? 'absolute inset-0' : 'fixed inset-0 z-0'} nature-forest-bg`}
       style={{ backgroundColor }}
     >
       {/* Sunlight rays */}

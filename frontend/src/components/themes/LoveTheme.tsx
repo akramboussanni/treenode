@@ -26,8 +26,10 @@ const LERP_FACTOR = 0.25;
 const CLICK_DURATION = 800;
 
 export default function LoveTheme({ 
+  themeColor = '#ff6b9d',
   accentColor = '#ff6b9d', 
-  mouseEffectsEnabled = true
+  mouseEffectsEnabled = true,
+  previewMode = false
 }: ThemeProps) {
   const [hearts, setHearts] = useState<HeartData[]>([]);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
@@ -161,7 +163,7 @@ export default function LoveTheme({
     };
     animationId.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationId.current!);
-  }, [hearts.length, mouseEffectsEnabled, accentColor]);
+  }, [hearts.length, mouseEffectsEnabled, themeColor, accentColor]);
 
   const onHeartClick = (id: number, event: React.MouseEvent) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -197,12 +199,12 @@ export default function LoveTheme({
   };
 
   return (
-    <div className="fixed inset-0 z-0">
-      {/* Background gradient using accent color */}
+    <div className={`${previewMode ? 'absolute inset-0' : 'fixed inset-0 z-0'}`}>
+      {/* Background gradient using theme color */}
       <div 
         className="absolute inset-0 opacity-10 pointer-events-none"
         style={{
-          background: `radial-gradient(circle at 50% 50%, ${accentColor}20 0%, transparent 70%)`
+          background: `radial-gradient(circle at 50% 50%, ${themeColor}20 0%, transparent 70%)`
         }}
       />
       
@@ -236,7 +238,7 @@ export default function LoveTheme({
           style={{ 
             left: `${heart.originalX}%`, 
             top: `${heart.originalY}%`,
-            zIndex: 10,
+            zIndex: 0,
             transitionDelay: '0ms',
             pointerEvents: 'auto'
           }}
@@ -246,8 +248,8 @@ export default function LoveTheme({
             className="w-8 h-8 transition-transform"
             style={{
               transitionDuration: '800ms',
-              color: `${accentColor}66`,
-              fill: darkenHex(accentColor, 0.2)
+              color: `${themeColor}66`,
+              fill: darkenHex(themeColor, 0.2)
             }}
           />
         </div>

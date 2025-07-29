@@ -217,3 +217,52 @@ func (nr *NodeRouter) HandleGetPublicLinksByName(w http.ResponseWriter, r *http.
 
 	api.WriteJSON(w, 200, links)
 }
+
+// @Summary Get public link information by subdomain and link name
+// @Description Get public information about a specific link by subdomain and link name (no authentication required)
+// @Tags public
+// @Produce json
+// @Param subdomain path string true "Subdomain name"
+// @Param linkName path string true "Link name"
+// @Success 200 {object} model.Link
+// @Failure 404 {string} string "Not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router /nodes/public/subdomain/{subdomain}/links/{linkName} [get]
+func (nr *NodeRouter) HandleGetPublicLinkBySubdomain(w http.ResponseWriter, r *http.Request) {
+	subdomain := chi.URLParam(r, "subdomain")
+	if subdomain == "" {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	linkName := chi.URLParam(r, "linkName")
+	if linkName == "" {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	node, err := nr.NodeRepo.GetNodeBySubdomain(r.Context(), subdomain)
+	if err != nil {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	link, err := nr.LinkRepo.GetLinkByNameAndNodeID(r.Context(), linkName, node.ID)
+	if err != nil {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	// Check if link is visible and enabled
+	if !link.Visible || !link.Enabled {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	err = nr.LinkRepo.LoadColorStops(r.Context(), link)
+	if err != nil {
+		applog.Error("Failed to load color stops for link:", link.ID, err)
+	}
+
+	api.WriteJSON(w, 200, link)
+}

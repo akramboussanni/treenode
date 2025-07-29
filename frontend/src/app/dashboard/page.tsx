@@ -21,6 +21,7 @@ import { apiClient } from '@/lib/api';
 import { Node } from '@/types';
 import { config } from '@/config';
 
+
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function DashboardPage() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [loadingNodes, setLoadingNodes] = useState(true);
   const [deletingNode, setDeletingNode] = useState<string | null>(null);
+
 
   const loadNodes = useCallback(async () => {
     try {
@@ -121,6 +123,8 @@ export default function DashboardPage() {
     router.push(`/nodes/${nodeId}`);
   };
 
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -149,6 +153,7 @@ export default function DashboardPage() {
               </Badge>
             </div>
             <div className="flex items-center space-x-2 node-header-actions">
+
               <Button
                 onClick={() => router.push('/nodes/create')}
                 className="bg-cottage-green hover:bg-cottage-green/90 text-cottage-cream"
@@ -171,6 +176,16 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+
+
+        {/* Nodes Section */}
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Your Nodes</h2>
+          <p className="text-muted-foreground">
+            Manage your link nodes and their themes
+          </p>
+        </div>
+
         {loadingNodes ? (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cottage-brown"></div>

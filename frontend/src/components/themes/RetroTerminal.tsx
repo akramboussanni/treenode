@@ -248,8 +248,9 @@ function hexToRgb(hex: string): [number, number, number] {
 }
 
 export default function RetroTerminal({ 
-  accentColor = '#00ff00', 
-  mouseEffectsEnabled = true
+  themeColor = '#00ff00', 
+  mouseEffectsEnabled = true,
+  previewMode = false
 }: ThemeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const programRef = useRef<Program>(null);
@@ -261,7 +262,7 @@ export default function RetroTerminal({
   const loadAnimationStartRef = useRef<number>(0);
   const timeOffsetRef = useRef<number>(Math.random() * 100);
 
-  const tintVec = useMemo(() => hexToRgb(accentColor), [accentColor]);
+  const tintVec = useMemo(() => hexToRgb(themeColor), [themeColor]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!mouseEffectsEnabled) return;
@@ -383,7 +384,7 @@ export default function RetroTerminal({
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-0 retro-terminal-bg"
+      className={`${previewMode ? 'absolute inset-0' : 'fixed inset-0 z-0'} retro-terminal-bg`}
     />
   );
 } 

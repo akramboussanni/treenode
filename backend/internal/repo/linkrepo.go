@@ -127,6 +127,13 @@ func (r *LinkRepo) CheckNameExists(ctx context.Context, name string) (bool, erro
 	return exists, err
 }
 
+func (r *LinkRepo) CheckNameExistsInNode(ctx context.Context, name string, nodeID int64) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM links WHERE name = $1 AND node_id = $2)`
+	err := r.db.GetContext(ctx, &exists, query, name, nodeID)
+	return exists, err
+}
+
 func (r *LinkRepo) GetVisibleLinksByNodeID(ctx context.Context, nodeID int64) ([]model.Link, error) {
 	var links []model.Link
 	query := fmt.Sprintf("SELECT %s FROM links WHERE node_id = $1 AND visible = true AND enabled = true ORDER BY position ASC, created_at ASC", r.linkColumns.AllRaw)
@@ -141,16 +148,27 @@ func (r *LinkRepo) GetLinkRedirectByNameAndNodeID(ctx context.Context, name stri
 	return link, err
 }
 
+func (r *LinkRepo) GetLinkByNameAndNodeID(ctx context.Context, name string, nodeID int64) (*model.Link, error) {
+	var link model.Link
+	query := fmt.Sprintf("SELECT %s FROM links WHERE name = $1 AND node_id = $2", r.linkColumns.AllRaw)
+	err := r.db.GetContext(ctx, &link, query, name, nodeID)
+	return &link, err
+}
+
 func (r *LinkRepo) UpdateLink(ctx context.Context, link *model.Link) error {
 	query := `
 		UPDATE links 
-		SET name = $1, display_name = $2, link = $3, icon = $4, visible = $5, enabled = $6, mini = $7,
-		    gradient_type = $8, gradient_angle = $9, updated_at = $10
-		WHERE id = $11
+		SET name = $1, display_name = $2, link = $3, description = $4, icon = $5, visible = $6, enabled = $7, mini = $8,
+		    gradient_type = $9, gradient_angle = $10, custom_accent_color_enabled = $11, custom_accent_color = $12, 
+		    custom_title_color_enabled = $13, custom_title_color = $14, custom_description_color_enabled = $15, 
+		    custom_description_color = $16, updated_at = $17
+		WHERE id = $18
 	`
 	_, err := r.db.ExecContext(ctx, query,
-		link.Name, link.DisplayName, link.Link, link.Icon, link.Visible, link.Enabled, link.Mini,
-		link.GradientType, link.GradientAngle, time.Now().UTC().Unix(), link.ID)
+		link.Name, link.DisplayName, link.Link, link.Description, link.Icon, link.Visible, link.Enabled, link.Mini,
+		link.GradientType, link.GradientAngle, link.CustomAccentColorEnabled, link.CustomAccentColor,
+		link.CustomTitleColorEnabled, link.CustomTitleColor, link.CustomDescriptionColorEnabled, link.CustomDescriptionColor,
+		time.Now().UTC().Unix(), link.ID)
 	return err
 }
 

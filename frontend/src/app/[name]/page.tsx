@@ -6,18 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ExternalLink, Share2 } from 'lucide-react';
+import { ExternalLink, Share2, Copy } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { Node, Link as LinkType } from '@/types';
 import { getIcon } from '@/lib/icons';
+import { useToast } from '@/hooks/use-toast';
 import LoveTheme from '@/components/themes/LoveTheme';
 import RetroTerminal from '@/components/themes/RetroTerminal';
 import NeonCyber from '@/components/themes/NeonCyber';
 import NatureForest from '@/components/themes/NatureForest';
 import LiquidChrome from '@/components/themes/LiquidChrome';
 import Galaxy from '@/components/themes/Galaxy';
-import Ballpit from '@/components/themes/Ballpit';
 import Iridescence from '@/components/themes/Iridescence';
+import Whirlwind from '@/components/themes/Whirlwind';
+import Lightning from '@/components/themes/Lightning';
+import DotGrid from '@/components/themes/DotGrid';
+import Threads from '@/components/themes/Threads';
+import Beams from '@/components/themes/Beams';
+import BallpitTheme from '@/components/themes/Ballpit';
+import Waves from '@/components/themes/Waves';
+import Dither from '@/components/themes/Dither';
 
 // Helper function to generate gradient style
 const getGradientStyle = (link: LinkType): React.CSSProperties => {
@@ -49,6 +57,7 @@ const getGradientStyle = (link: LinkType): React.CSSProperties => {
 
 export default function PublicNode() {
   const params = useParams();
+  const { toast } = useToast();
   const [node, setNode] = useState<Node | null>(null);
   const [links, setLinks] = useState<LinkType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +98,9 @@ export default function PublicNode() {
   }, [params.name, loadPublicNode]);
 
   const handleLinkClick = (link: LinkType) => {
-    window.open(link.link, '_blank');
+    if (link.link && link.link.trim() !== '') {
+      window.open(link.link, '_blank');
+    }
   };
 
   const handleShare = () => {
@@ -100,6 +111,18 @@ export default function PublicNode() {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
+  const handleCopyRedirect = (link: LinkType, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (link.name) {
+      const redirectUrl = `${window.location.origin}/${params.name}/${link.name}`;
+      navigator.clipboard.writeText(redirectUrl);
+      toast({
+        title: "Redirect URL copied!",
+        description: `Copied ${redirectUrl} to clipboard`,
+      });
     }
   };
 
@@ -142,7 +165,8 @@ export default function PublicNode() {
       {/* Theme Background */}
       {node.theme === 'love' && (
         <LoveTheme
-          accentColor={node.theme_color}
+          themeColor={node.theme_color}
+          accentColor={node.accent_color}
           titleFontColor={node.title_font_color}
           captionFontColor={node.caption_font_color}
           backgroundColor={node.background_color}
@@ -162,7 +186,8 @@ export default function PublicNode() {
       )}
       {node.theme === 'neon-cyber' && (
         <NeonCyber
-          accentColor={node.theme_color}
+          themeColor={node.theme_color}
+          accentColor={node.accent_color}
           titleFontColor={node.title_font_color}
           captionFontColor={node.caption_font_color}
           backgroundColor={node.background_color}
@@ -201,8 +226,9 @@ export default function PublicNode() {
         />
       )}
       {node.theme === 'ballpit' && (
-        <Ballpit
-          accentColor={node.theme_color}
+        <BallpitTheme
+          themeColor={node.theme_color}
+          accentColor={node.accent_color}
           titleFontColor={node.title_font_color}
           captionFontColor={node.caption_font_color}
           backgroundColor={node.background_color}
@@ -218,6 +244,49 @@ export default function PublicNode() {
           backgroundColor={node.background_color}
           mouseEffectsEnabled={node.mouse_effects_enabled}
           textShadowsEnabled={node.text_shadows_enabled}
+        />
+      )}
+      {node.theme === 'whirlwind' && (
+        <Whirlwind
+          accentColor={node.theme_color}
+          mouseEffectsEnabled={node.mouse_effects_enabled}
+        />
+      )}
+      {node.theme === 'lightning' && (
+        <Lightning
+          accentColor={node.theme_color}
+          mouseEffectsEnabled={node.mouse_effects_enabled}
+        />
+      )}
+      {node.theme === 'dotgrid' && (
+        <DotGrid
+          themeColor={node.theme_color}
+          accentColor={node.accent_color}
+          mouseEffectsEnabled={node.mouse_effects_enabled}
+        />
+      )}
+      {node.theme === 'threads' && (
+        <Threads
+          accentColor={node.theme_color}
+          mouseEffectsEnabled={node.mouse_effects_enabled}
+        />
+      )}
+      {node.theme === 'beams' && (
+        <Beams
+          accentColor={node.theme_color}
+          mouseEffectsEnabled={node.mouse_effects_enabled}
+        />
+      )}
+      {node.theme === 'waves' && (
+        <Waves
+          accentColor={node.theme_color}
+          mouseEffectsEnabled={node.mouse_effects_enabled}
+        />
+      )}
+      {node.theme === 'dither' && (
+        <Dither
+          accentColor={node.theme_color}
+          mouseEffectsEnabled={node.mouse_effects_enabled}
         />
       )}
       <div className="container mx-auto px-4 py-8">
@@ -308,9 +377,12 @@ export default function PublicNode() {
               return (
                 <Card 
                   key={link.id} 
-                  className={`card-hover-lift cursor-pointer border-cottage-warm transition-all duration-200 hover:scale-[1.02] bg-transparent ${node.theme !== 'default' ? 'drop-shadow-lg' : ''}`}
+                  className={`card-hover-lift cursor-pointer transition-all duration-200 hover:scale-[1.02] bg-transparent ${node.theme !== 'default' ? 'drop-shadow-lg' : ''}`}
                   style={{
                     ...gradientStyle,
+                    borderColor: link.custom_accent_color_enabled && link.custom_accent_color 
+                      ? link.custom_accent_color 
+                      : node.accent_color || '#66CC66',
                     boxShadow: node.text_shadows_enabled ? '0 8px 16px rgba(0,0,0,0.3), 0 4px 8px rgba(0,0,0,0.2)' : 'none'
                   }}
                   onClick={() => handleLinkClick(link)}
@@ -320,7 +392,12 @@ export default function PublicNode() {
                       <div className="flex items-center space-x-4">
                         <div 
                           className="text-2xl"
-                          style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }}
+                          style={{ 
+                            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
+                            color: link.custom_accent_color_enabled && link.custom_accent_color 
+                              ? link.custom_accent_color 
+                              : node.accent_color || '#66CC66'
+                          }}
                         >
                           {React.createElement(getIcon(link.icon), { className: "h-6 w-6" })}
                         </div>
@@ -328,27 +405,68 @@ export default function PublicNode() {
                           <h3 
                             className={`text-lg font-semibold ${node.text_shadows_enabled ? 'drop-shadow-sm' : ''}`}
                             style={{ 
-                              color: node.title_font_color || '#8B7355',
+                              color: link.custom_title_color_enabled && link.custom_title_color 
+                                ? link.custom_title_color 
+                                : node.title_font_color || '#8B7355',
                               textShadow: node.text_shadows_enabled ? '0 1px 2px rgba(0,0,0,0.3)' : 'none'
                             }}
                           >
                             {link.display_name}
                           </h3>
-                          <p 
-                            className={`text-sm ${node.text_shadows_enabled ? 'drop-shadow-sm' : ''}`}
-                            style={{ 
-                              color: node.caption_font_color || '#666666',
-                              textShadow: node.text_shadows_enabled ? '0 1px 2px rgba(0,0,0,0.3)' : 'none'
-                            }}
-                          >
-                            {link.link}
-                          </p>
+                          {link.description && (
+                            <p 
+                              className={`text-sm ${node.text_shadows_enabled ? 'drop-shadow-sm' : ''}`}
+                              style={{ 
+                                color: link.custom_description_color_enabled && link.custom_description_color 
+                                  ? link.custom_description_color 
+                                  : node.caption_font_color || '#666666',
+                                textShadow: node.text_shadows_enabled ? '0 1px 2px rgba(0,0,0,0.3)' : 'none'
+                              }}
+                            >
+                              {link.description}
+                            </p>
+                          )}
+                          {!link.description && link.link && (
+                            <p 
+                              className={`text-sm ${node.text_shadows_enabled ? 'drop-shadow-sm' : ''}`}
+                              style={{ 
+                                color: link.custom_description_color_enabled && link.custom_description_color 
+                                  ? link.custom_description_color 
+                                  : node.caption_font_color || '#666666',
+                                textShadow: node.text_shadows_enabled ? '0 1px 2px rgba(0,0,0,0.3)' : 'none'
+                              }}
+                            >
+                              {link.link}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <ExternalLink 
-                        className="h-5 w-5" 
-                        style={{ color: node.accent_color || '#66CC66' }}
-                      />
+                      <div className="flex items-center space-x-2">
+                        {link.name && (
+                          <button
+                            onClick={(e) => handleCopyRedirect(link, e)}
+                            className="p-1 hover:bg-white/10 rounded transition-colors"
+                            title="Copy redirect URL"
+                          >
+                            <Copy 
+                              className="h-4 w-4" 
+                              style={{ 
+                                color: link.custom_accent_color_enabled && link.custom_accent_color 
+                                  ? link.custom_accent_color 
+                                  : node.accent_color || '#66CC66'
+                              }}
+                            />
+                          </button>
+                        )}
+                        <ExternalLink 
+                          className="h-5 w-5" 
+                          style={{ 
+                            color: link.custom_accent_color_enabled && link.custom_accent_color 
+                              ? link.custom_accent_color 
+                              : node.accent_color || '#66CC66'
+                          }}
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

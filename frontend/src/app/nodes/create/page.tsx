@@ -7,17 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, 
   Plus, 
   Globe, 
-  Edit, 
-  Trash2,
-  Eye,
-  EyeOff,
   Check,
-  X,
   LogOut
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -25,10 +19,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
-import { Node, Link as LinkType } from '@/types';
-import { getIcon } from '@/lib/icons';
+import { Node } from '@/types';
 import { config } from '@/config';
-import LinkEditor from '@/components/LinkEditor';
 
 const createNodeSchema = z.object({
   subdomainName: z.string().min(1, 'Subdomain name is required').regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens are allowed'),
@@ -42,10 +34,6 @@ export default function CreateNodePage() {
   const { toast } = useToast();
   const [isSuccess, setIsSuccess] = useState(false);
   const [createdNode, setCreatedNode] = useState<Node | null>(null);
-  const [links, setLinks] = useState<LinkType[]>([]);
-  const [showLinkEditor, setShowLinkEditor] = useState(false);
-  const [editingLink, setEditingLink] = useState<LinkType | null>(null);
-  const [deletingLink, setDeletingLink] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogout = async () => {
@@ -60,6 +48,7 @@ export default function CreateNodePage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<CreateNodeFormData>({
     resolver: zodResolver(createNodeSchema),
@@ -117,90 +106,6 @@ export default function CreateNodePage() {
   const handleManageNode = () => {
     if (createdNode) {
       router.push(`/nodes/${createdNode.id}`);
-    }
-  };
-
-  const handleCreateLink = async (data: { name: string; display_name: string; link: string; icon: string; visible: boolean; enabled: boolean; mini: boolean; gradient_type: string; gradient_angle: number; color_stops: Array<{ color: string; position: number }> }) => {
-    try {
-      // For now, just add to local state since we don't have a node ID yet
-      const newLink: LinkType = {
-        id: `temp-${Date.now()}`,
-        node_id: 'temp', // Will be replaced when node is created
-        name: data.name,
-        display_name: data.display_name,
-        link: data.link,
-        icon: data.icon,
-        visible: data.visible,
-        enabled: data.enabled,
-        mini: data.mini,
-        position: links.length, // Add position based on current number of links
-        gradient_type: data.gradient_type,
-        gradient_angle: data.gradient_angle,
-        color_stops: data.color_stops.map((stop, index) => ({
-          id: `temp-${Date.now()}-${index}`,
-          link_id: `temp-${Date.now()}`,
-          color: stop.color,
-          position: stop.position,
-          created_at: Date.now(),
-        })),
-        created_at: Date.now(),
-        updated_at: Date.now(),
-      };
-      
-      setLinks([...links, newLink]);
-      toast({
-        title: "Success",
-        description: "Link added successfully",
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "An error occurred while adding the link",
-        variant: "destructive",
-      });
-      throw new Error("Failed to add link"); // Re-throw to let LinkEditor know the submission failed
-    }
-  };
-
-  const handleUpdateLink = async (data: { name: string; display_name: string; link: string; icon: string; visible: boolean; enabled: boolean; mini: boolean; gradient_type: string; gradient_angle: number; color_stops: Array<{ color: string; position: number }> }) => {
-    if (!editingLink) return;
-    
-    try {
-      const updatedLinks = links.map(link => 
-        link.id === editingLink.id ? { ...link, ...data } as LinkType : link
-      );
-      setLinks(updatedLinks);
-      setEditingLink(null);
-      toast({
-        title: "Success",
-        description: "Link updated successfully",
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "An error occurred while updating the link",
-        variant: "destructive",
-      });
-      throw new Error("Failed to update link"); // Re-throw to let LinkEditor know the submission failed
-    }
-  };
-
-  const handleDeleteLink = async (linkId: string) => {
-    try {
-      setDeletingLink(linkId);
-      setLinks(links.filter(link => link.id !== linkId));
-      toast({
-        title: "Success",
-        description: "Link deleted successfully",
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "An error occurred while deleting the link",
-        variant: "destructive",
-      });
-    } finally {
-      setDeletingLink(null);
     }
   };
 
@@ -340,112 +245,10 @@ export default function CreateNodePage() {
                     placeholder="my-awesome-links"
                   />
                   <p className="text-xs text-muted-foreground">
-                    This will be your URL: {config.getBaseUrl()}/[subdomain-name]
+                    This will be your URL: {config.getBaseUrl()}/{watch('subdomainName') || '[subdomain-name]'}
                   </p>
                   {errors.subdomainName && (
                     <p className="text-sm text-destructive">{errors.subdomainName.message}</p>
-                  )}
-                </div>
-
-                {/* Links Management */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">Links</h3>
-                    <Button
-                      type="button"
-                      onClick={() => setShowLinkEditor(true)}
-                      className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Link
-                    </Button>
-                  </div>
-
-                  {links.length > 0 ? (
-                    <div className="space-y-2">
-                      {links.map((link) => (
-                        <Card key={link.id} className="border-cottage-warm bg-cottage-cream">
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-4">
-                                <div className="text-2xl">
-                                  {React.createElement(getIcon(link.icon), { className: "h-6 w-6" })}
-                                </div>
-                                <div className="flex-1">
-                                  <h3 className="text-lg font-semibold text-foreground">
-                                    {link.display_name}
-                                  </h3>
-                                  <p className="text-sm text-muted-foreground">
-                                    {link.link}
-                                  </p>
-                                  <div className="flex items-center space-x-2 mt-1">
-                                    {link.visible ? (
-                                      <Badge variant="default" className="text-xs">
-                                        <Eye className="h-3 w-3 mr-1" />
-                                        Visible
-                                      </Badge>
-                                    ) : (
-                                      <Badge variant="secondary" className="text-xs">
-                                        <EyeOff className="h-3 w-3 mr-1" />
-                                        Hidden
-                                      </Badge>
-                                    )}
-                                    {link.enabled ? (
-                                      <Badge variant="default" className="text-xs">
-                                        <Check className="h-3 w-3 mr-1" />
-                                        Enabled
-                                      </Badge>
-                                    ) : (
-                                      <Badge variant="destructive" className="text-xs">
-                                        <X className="h-3 w-3 mr-1" />
-                                        Disabled
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditingLink(link);
-                                    setShowLinkEditor(true);
-                                  }}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleDeleteLink(link.id)}
-                                  disabled={deletingLink === link.id}
-                                >
-                                  {deletingLink === link.id ? (
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                                  ) : (
-                                    <Trash2 className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-                      <Globe className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground mb-4">No links yet</p>
-                      <Button
-                        type="button"
-                        onClick={() => setShowLinkEditor(true)}
-                        className="bg-cottage-brown hover:bg-cottage-brown/90 text-cottage-cream"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Your First Link
-                      </Button>
-                    </div>
                   )}
                 </div>
 
@@ -466,21 +269,6 @@ export default function CreateNodePage() {
               </form>
             </CardContent>
           </Card>
-
-          {/* LinkEditor Modal */}
-          {showLinkEditor && (
-            <LinkEditor
-              isOpen={showLinkEditor}
-              onClose={() => {
-                setShowLinkEditor(false);
-                setEditingLink(null);
-              }}
-              onSubmit={editingLink ? handleUpdateLink : handleCreateLink}
-              initialData={editingLink || undefined}
-              isEditing={!!editingLink}
-              isSubmitting={false}
-            />
-          )}
         </div>
       </main>
     </div>

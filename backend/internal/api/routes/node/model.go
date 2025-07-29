@@ -24,47 +24,61 @@ type UpdateNodeRequest struct {
 }
 
 type CreateLinkRequest struct {
-	Name          string                   `json:"name"`
-	DisplayName   string                   `json:"display_name" binding:"required"`
-	Link          string                   `json:"link" binding:"required"`
-	Icon          string                   `json:"icon"`
-	Visible       bool                     `json:"visible"`
-	Enabled       bool                     `json:"enabled"`
-	Mini          bool                     `json:"mini"`
-	GradientType  string                   `json:"gradient_type"`
-	GradientAngle float64                  `json:"gradient_angle"`
-	ColorStops    []CreateColorStopRequest `json:"color_stops"`
+	Name                          string                   `json:"name"`
+	DisplayName                   string                   `json:"display_name" binding:"required"`
+	Link                          string                   `json:"link"`
+	Description                   string                   `json:"description"`
+	Icon                          string                   `json:"icon"`
+	Visible                       bool                     `json:"visible"`
+	Enabled                       bool                     `json:"enabled"`
+	Mini                          bool                     `json:"mini"`
+	GradientType                  string                   `json:"gradient_type"`
+	GradientAngle                 float64                  `json:"gradient_angle"`
+	ColorStops                    []CreateColorStopRequest `json:"color_stops"`
+	CustomAccentColorEnabled      *bool                    `json:"custom_accent_color_enabled"`
+	CustomAccentColor             string                   `json:"custom_accent_color"`
+	CustomTitleColorEnabled       *bool                    `json:"custom_title_color_enabled"`
+	CustomTitleColor              string                   `json:"custom_title_color"`
+	CustomDescriptionColorEnabled *bool                    `json:"custom_description_color_enabled"`
+	CustomDescriptionColor        string                   `json:"custom_description_color"`
 }
 
 type UpdateLinkRequest struct {
-	Name          string                   `json:"name"`
-	DisplayName   string                   `json:"display_name"`
-	Link          string                   `json:"link"`
-	Icon          string                   `json:"icon"`
-	Visible       *bool                    `json:"visible"`
-	Enabled       *bool                    `json:"enabled"`
-	Mini          *bool                    `json:"mini"`
-	GradientType  string                   `json:"gradient_type"`
-	GradientAngle float64                  `json:"gradient_angle"`
-	ColorStops    []CreateColorStopRequest `json:"color_stops"`
+	Name                          string                   `json:"name"`
+	DisplayName                   string                   `json:"display_name"`
+	Link                          string                   `json:"link"`
+	Description                   string                   `json:"description"`
+	Icon                          string                   `json:"icon"`
+	Visible                       bool                     `json:"visible"`
+	Enabled                       bool                     `json:"enabled"`
+	Mini                          bool                     `json:"mini"`
+	GradientType                  string                   `json:"gradient_type"`
+	GradientAngle                 float64                  `json:"gradient_angle"`
+	ColorStops                    []CreateColorStopRequest `json:"color_stops"`
+	CustomAccentColorEnabled      *bool                    `json:"custom_accent_color_enabled"`
+	CustomAccentColor             string                   `json:"custom_accent_color"`
+	CustomTitleColorEnabled       *bool                    `json:"custom_title_color_enabled"`
+	CustomTitleColor              string                   `json:"custom_title_color"`
+	CustomDescriptionColorEnabled *bool                    `json:"custom_description_color_enabled"`
+	CustomDescriptionColor        string                   `json:"custom_description_color"`
 }
 
 type CreateColorStopRequest struct {
-	Color    string `json:"color" binding:"required"`
-	Position int    `json:"position" binding:"required"`
+	Color    string  `json:"color"`
+	Position float64 `json:"position"`
 }
 
 type UpdateColorStopRequest struct {
-	Color    string `json:"color" binding:"required"`
-	Position int    `json:"position" binding:"required"`
+	Color    string  `json:"color" binding:"required"`
+	Position float64 `json:"position,string" binding:"required"`
 }
 
 type TransferOwnershipRequest struct {
-	NewOwnerID int64 `json:"new_owner_id" binding:"required"`
+	NewOwnerID int64 `json:"new_owner_id,string"`
 }
 
 type AddCollaboratorRequest struct {
-	UserID int64 `json:"user_id" binding:"required"`
+	UserID int64 `json:"user_id,string"`
 }
 
 type InviteCollaboratorRequest struct {

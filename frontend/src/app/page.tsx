@@ -13,7 +13,6 @@ import {
   Code,
   User,
   Plus,
-  Users,
   Palette,
   Link,
   LogOut
@@ -123,10 +122,10 @@ export default function LandingPage() {
           <h1 className="text-5xl font-bold text-foreground font-serif mb-6">
             <span className="text-cottage-brown">Treenode</span>
             <br />
-            A robust place to store your links
+            Your Personal Link Hub
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            Create a centralized hub for all your important links. Organize, customize, and share your online presence with a clean, professional interface.
+            Create a beautiful, customizable page that showcases all your important links in one place. Perfect for social media bios, business cards, or anywhere you want to share multiple links with a single URL.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12">
@@ -181,9 +180,9 @@ export default function LandingPage() {
               <div className="flex items-start space-x-4">
                 <Link className="h-10 w-10 text-cottage-brown flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Robust Link Management</h3>
+                  <h3 className="text-xl font-semibold mb-2">Smart Redirects</h3>
                   <p className="text-muted-foreground">
-                    Add, organize, and manage your links with a powerful interface that gives you full control
+                    Create custom redirect URLs like yourdomain.com/instagram that automatically send visitors to your social media profiles
                   </p>
                 </div>
               </div>
@@ -233,7 +232,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-semibold mb-2">Add your links</h3>
               <p className="text-muted-foreground">
-                Add your social media, website, and other important links
+                Add your social media, website, and other important links. Create custom redirect URLs for easy sharing
               </p>
             </div>
             
@@ -277,8 +276,11 @@ export default function LandingPage() {
             <Link className="h-6 w-6 text-cottage-brown" />
             <span className="text-lg font-semibold">Treenode</span>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-2">
             Made with ❤️ by the open source community
+          </p>
+          <p className="text-sm text-muted-foreground">
+            by akramboussanni
           </p>
         </div>
       </footer>

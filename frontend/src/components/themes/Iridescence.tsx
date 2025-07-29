@@ -43,13 +43,17 @@ void main() {
   d += uTime * 0.5 * uSpeed;
   vec3 col = vec3(cos(uv * vec2(d, a)) * 0.6 + 0.4, cos(a + d) * 0.5 + 0.5);
   col = cos(col * cos(vec3(d, a, 2.5)) * 0.5 + 0.5) * uColor;
+  // Make the theme color more prominent
+  col = mix(col, uColor, 0.3);
   gl_FragColor = vec4(col, 1.0);
 }
 `;
 
 export default function Iridescence({ 
-  accentColor = '#4f46e5', 
-  mouseEffectsEnabled = true
+  themeColor = '#4f46e5', 
+  accentColor = '#4f46e5',
+  mouseEffectsEnabled = true,
+  previewMode = false
 }: ThemeProps) {
   const ctnDom = useRef<HTMLDivElement>(null);
   const mousePos = useRef({ x: 0.5, y: 0.5 });
@@ -73,22 +77,8 @@ export default function Iridescence({
     const gl = renderer.gl;
     gl.clearColor(1, 1, 1, 1);
 
-    function resize() {
-      const scale = 1;
-      renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
-      if (program) {
-        program.uniforms.uResolution.value = new Color(
-          gl.canvas.width,
-          gl.canvas.height,
-          gl.canvas.width / gl.canvas.height
-        );
-      }
-    }
-    window.addEventListener("resize", resize, false);
-    resize();
-
     const geometry = new Triangle(gl);
-    const color = hexToRgb(accentColor);
+    const color = hexToRgb(themeColor);
     const program: Program = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,
@@ -107,6 +97,20 @@ export default function Iridescence({
         uSpeed: { value: 1.0 },
       },
     });
+
+    function resize() {
+      const scale = 1;
+      renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
+      if (program) {
+        program.uniforms.uResolution.value = new Color(
+          gl.canvas.width,
+          gl.canvas.height,
+          gl.canvas.width / gl.canvas.height
+        );
+      }
+    }
+    window.addEventListener("resize", resize, false);
+    resize();
 
     const mesh = new Mesh(gl, { geometry, program });
     let animateId: number;
@@ -144,12 +148,12 @@ export default function Iridescence({
       }
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [accentColor, mouseEffectsEnabled]);
+  }, [themeColor, accentColor, mouseEffectsEnabled]);
 
   return (
     <div
       ref={ctnDom}
-      className="fixed inset-0 z-0 iridescence-bg"
+      className={`${previewMode ? 'absolute inset-0' : 'fixed inset-0 z-0'} iridescence-bg`}
     />
   );
 } 

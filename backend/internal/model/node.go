@@ -18,7 +18,7 @@ type Node struct {
 	MouseEffectsEnabled bool    `json:"mouse_effects_enabled" safe:"true" db:"mouse_effects_enabled"`
 	TextShadowsEnabled  bool    `json:"text_shadows_enabled" safe:"true" db:"text_shadows_enabled"`
 	HidePoweredBy       bool    `json:"hide_powered_by" safe:"true" db:"hide_powered_by"`
-	PageTitle           string  `json:"page_title" db:"page_title"`
+	PageTitle           string  `json:"page_title" safe:"true" db:"page_title"`
 	Domain              string  `json:"domain" safe:"true" db:"domain"`
 	DomainVerified      bool    `json:"domain_verified" safe:"true" db:"domain_verified"`
 	CreatedAt           int64   `json:"created_at" safe:"true" db:"created_at"`

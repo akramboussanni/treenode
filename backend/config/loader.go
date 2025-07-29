@@ -114,6 +114,11 @@ func parseMapField(field reflect.Value, envTag string, shouldPanic string, defau
 }
 
 func ParseSafely[T any](input string, fun func(string) (T, error), envTag, shouldPanic, defaultTag string) T {
+	// If input is empty and we have a default, use the default
+	if input == "" && defaultTag != "" {
+		return ParseSafely(defaultTag, fun, envTag, shouldPanic, "")
+	}
+
 	val, err := fun(input)
 	if err != nil {
 		switch shouldPanic {

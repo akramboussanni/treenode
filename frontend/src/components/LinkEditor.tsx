@@ -5,14 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Plus, 
   X, 
   Search,
-  Check
+  Check,
+  ChevronDown,
+  Palette,
+  Image,
+  Settings
 } from 'lucide-react';
 import { getIcon, getIconList } from '@/lib/icons';
 import { Link as LinkType } from '@/types';
+import { config } from '@/config';
 
 interface FormColorStop {
   color: string;
@@ -23,6 +29,7 @@ interface LinkFormData {
   name: string;
   display_name: string;
   link: string;
+  description: string;
   icon: string;
   visible: boolean;
   enabled: boolean;
@@ -30,6 +37,12 @@ interface LinkFormData {
   gradient_type: string;
   gradient_angle: number;
   color_stops: FormColorStop[];
+  custom_accent_color_enabled: boolean;
+  custom_accent_color: string;
+  custom_title_color_enabled: boolean;
+  custom_title_color: string;
+  custom_description_color_enabled: boolean;
+  custom_description_color: string;
 }
 
 interface LinkEditorProps {
@@ -39,6 +52,7 @@ interface LinkEditorProps {
   initialData?: Partial<LinkType>;
   isEditing?: boolean;
   isSubmitting?: boolean;
+  nodeSubdomain?: string;
 }
 
 export default function LinkEditor({ 
@@ -47,18 +61,26 @@ export default function LinkEditor({
   onSubmit, 
   initialData, 
   isEditing = false,
-  isSubmitting = false 
+  isSubmitting = false,
+  nodeSubdomain
 }: LinkEditorProps) {
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     display_name: initialData?.display_name || '',
     link: initialData?.link || '',
+    description: initialData?.description || '',
     icon: initialData?.icon || '',
     visible: initialData?.visible ?? true,
     enabled: initialData?.enabled ?? true,
     mini: initialData?.mini ?? false,
     gradient_type: initialData?.gradient_type || 'solid',
     gradient_angle: initialData?.gradient_angle || 0,
+    custom_accent_color_enabled: initialData?.custom_accent_color_enabled ?? false,
+    custom_accent_color: initialData?.custom_accent_color || '',
+    custom_title_color_enabled: initialData?.custom_title_color_enabled ?? false,
+    custom_title_color: initialData?.custom_title_color || '',
+    custom_description_color_enabled: initialData?.custom_description_color_enabled ?? false,
+    custom_description_color: initialData?.custom_description_color || '',
   });
 
   const [colorStops, setColorStops] = useState<FormColorStop[]>(
@@ -87,12 +109,19 @@ export default function LinkEditor({
         name: initialData.name || '',
         display_name: initialData.display_name || '',
         link: initialData.link || '',
+        description: initialData.description || '',
         icon: initialData.icon || '',
         visible: initialData.visible ?? true,
         enabled: initialData.enabled ?? true,
         mini: initialData.mini ?? false,
         gradient_type: initialData.gradient_type || 'solid',
         gradient_angle: initialData.gradient_angle || 0,
+        custom_accent_color_enabled: initialData.custom_accent_color_enabled ?? false,
+        custom_accent_color: initialData.custom_accent_color || '',
+        custom_title_color_enabled: initialData.custom_title_color_enabled ?? false,
+        custom_title_color: initialData.custom_title_color || '',
+        custom_description_color_enabled: initialData.custom_description_color_enabled ?? false,
+        custom_description_color: initialData.custom_description_color || '',
       });
       setColorStops(initialData.color_stops || []);
       setSelectedGradientType(initialData.gradient_type || 'solid');
@@ -102,12 +131,19 @@ export default function LinkEditor({
         name: '',
         display_name: '',
         link: '',
+        description: '',
         icon: '',
         visible: true,
         enabled: true,
         mini: false,
         gradient_type: 'solid',
         gradient_angle: 0,
+        custom_accent_color_enabled: false,
+        custom_accent_color: '',
+        custom_title_color_enabled: false,
+        custom_title_color: '',
+        custom_description_color_enabled: false,
+        custom_description_color: '',
       });
       setColorStops([]);
       setSelectedGradientType('solid');
@@ -132,6 +168,12 @@ export default function LinkEditor({
       finalColorStops = [finalColorStops[0]];
     }
     
+    // Validate that at least one of name or link is provided
+    if (!formData.name && !formData.link) {
+      alert('Please provide either a link name or URL');
+      return;
+    }
+    
     const linkData = {
       ...formData,
       color_stops: finalColorStops
@@ -153,12 +195,19 @@ export default function LinkEditor({
       name: '',
       display_name: '',
       link: '',
+      description: '',
       icon: '',
       visible: true,
       enabled: true,
       mini: false,
       gradient_type: 'solid',
       gradient_angle: 0,
+      custom_accent_color_enabled: false,
+      custom_accent_color: '',
+      custom_title_color_enabled: false,
+      custom_title_color: '',
+      custom_description_color_enabled: false,
+      custom_description_color: '',
     });
     setColorStops([]);
     setSelectedGradientType('solid');
@@ -177,106 +226,262 @@ export default function LinkEditor({
             </DialogTitle>
           </DialogHeader>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Basic Information Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center">
+                <Settings className="h-5 w-5 mr-2" />
+                Basic Information
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="link_name">Link Name (URL)</Label>
+                  <Input
+                    id="link_name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="my-link"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This will be used in the URL: {config.getBaseUrl()}/{nodeSubdomain || '[subdomain]'}/{formData.name || '[name]'}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="link_display_name">Link Title</Label>
+                  <Input
+                    id="link_display_name"
+                    value={formData.display_name}
+                    onChange={(e) => handleInputChange('display_name', e.target.value)}
+                    placeholder="My Awesome Link"
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This is what users will see
+                  </p>
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="link_name">Link Name (URL)</Label>
+                <Label htmlFor="link_url">URL</Label>
                 <Input
-                  id="link_name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="my-link"
-                  required
+                  id="link_url"
+                  type="url"
+                  value={formData.link}
+                  onChange={(e) => handleInputChange('link', e.target.value)}
+                  placeholder="https://example.com"
                 />
                 <p className="text-xs text-muted-foreground">
-                  This will be used in the URL: [your-domain]/[name]
+                  Leave empty to disable redirect (link will be displayed as text only)
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="link_display_name">Display Name</Label>
+                <Label htmlFor="link_description">Description</Label>
                 <Input
-                  id="link_display_name"
-                  value={formData.display_name}
-                  onChange={(e) => handleInputChange('display_name', e.target.value)}
-                  placeholder="My Awesome Link"
-                  required
+                  id="link_description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Optional description for this link"
                 />
                 <p className="text-xs text-muted-foreground">
-                  This is what users will see
+                  This will be displayed below the link name
                 </p>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="link_visible"
+                    checked={formData.visible}
+                    onChange={(e) => handleInputChange('visible', e.target.checked)}
+                  />
+                  <Label htmlFor="link_visible">Visible</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="link_enabled"
+                    checked={formData.enabled}
+                    onChange={(e) => handleInputChange('enabled', e.target.checked)}
+                  />
+                  <Label htmlFor="link_enabled">Enabled</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="link_mini"
+                    checked={formData.mini}
+                    onChange={(e) => handleInputChange('mini', e.target.checked)}
+                  />
+                  <Label htmlFor="link_mini">Mini (Icon Only)</Label>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="link_url">URL</Label>
-              <Input
-                id="link_url"
-                type="url"
-                value={formData.link}
-                onChange={(e) => handleInputChange('link', e.target.value)}
-                placeholder="https://example.com"
-                required
-              />
-            </div>
+            {/* Icon Section */}
+            <Collapsible className="space-y-4">
+              <CollapsibleTrigger>
+                <div className="flex items-center">
+                  <Image className="h-5 w-5 mr-2" />
+                  <span className="font-semibold">Icon</span>
+                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="space-y-2">
+                  <Label htmlFor="link_icon">Icon</Label>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 p-2 border rounded-md bg-cottage-cream flex items-center space-x-2">
+                      {formData.icon ? (
+                        <>
+                          {React.createElement(getIcon(formData.icon), { className: "h-5 w-5" })}
+                          <span className="text-sm text-muted-foreground">{formData.icon}</span>
+                        </>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">Select an icon</span>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowIconPicker(true)}
+                    >
+                      Pick Icon
+                    </Button>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
-            <div className="space-y-2">
-              <Label htmlFor="link_icon">Icon</Label>
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 p-2 border rounded-md bg-cottage-cream flex items-center space-x-2">
-                  {formData.icon ? (
-                    <>
-                      {React.createElement(getIcon(formData.icon), { className: "h-5 w-5" })}
-                      <span className="text-sm text-muted-foreground">{formData.icon}</span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">Select an icon</span>
+            {/* Color Customization Section */}
+            <Collapsible className="space-y-4">
+              <CollapsibleTrigger>
+                <div className="flex items-center">
+                  <Palette className="h-5 w-5 mr-2" />
+                  <span className="font-semibold">Color Customization</span>
+                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                {/* Accent Color (Icons & Outlines) */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="custom_accent_color_enabled"
+                      checked={formData.custom_accent_color_enabled}
+                      onChange={(e) => handleInputChange('custom_accent_color_enabled', e.target.checked)}
+                    />
+                    <Label htmlFor="custom_accent_color_enabled">Use Custom Accent Color</Label>
+                  </div>
+                  
+                  {formData.custom_accent_color_enabled && (
+                    <div className="space-y-2">
+                      <Label htmlFor="custom_accent_color">Accent Color (Icons & Outlines)</Label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          id="custom_accent_color"
+                          value={formData.custom_accent_color || '#000000'}
+                          onChange={(e) => handleInputChange('custom_accent_color', e.target.value)}
+                          className="w-12 h-8 border rounded"
+                        />
+                        <Input
+                          value={formData.custom_accent_color || '#000000'}
+                          onChange={(e) => handleInputChange('custom_accent_color', e.target.value)}
+                          placeholder="#000000"
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowIconPicker(true)}
-                >
-                  Pick Icon
-                </Button>
-              </div>
-            </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="link_visible"
-                  checked={formData.visible}
-                  onChange={(e) => handleInputChange('visible', e.target.checked)}
-                />
-                <Label htmlFor="link_visible">Visible</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="link_enabled"
-                  checked={formData.enabled}
-                  onChange={(e) => handleInputChange('enabled', e.target.checked)}
-                />
-                <Label htmlFor="link_enabled">Enabled</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="link_mini"
-                  checked={formData.mini}
-                  onChange={(e) => handleInputChange('mini', e.target.checked)}
-                />
-                <Label htmlFor="link_mini">Mini (Icon Only)</Label>
-              </div>
-            </div>
+                {/* Title Color */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="custom_title_color_enabled"
+                      checked={formData.custom_title_color_enabled}
+                      onChange={(e) => handleInputChange('custom_title_color_enabled', e.target.checked)}
+                    />
+                    <Label htmlFor="custom_title_color_enabled">Use Custom Title Color</Label>
+                  </div>
+                  
+                  {formData.custom_title_color_enabled && (
+                    <div className="space-y-2">
+                      <Label htmlFor="custom_title_color">Title Color</Label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          id="custom_title_color"
+                          value={formData.custom_title_color || '#000000'}
+                          onChange={(e) => handleInputChange('custom_title_color', e.target.value)}
+                          className="w-12 h-8 border rounded"
+                        />
+                        <Input
+                          value={formData.custom_title_color || '#000000'}
+                          onChange={(e) => handleInputChange('custom_title_color', e.target.value)}
+                          placeholder="#000000"
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-            {/* Color/Gradient Section - Hidden when mini is enabled */}
+                {/* Description Color */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="custom_description_color_enabled"
+                      checked={formData.custom_description_color_enabled}
+                      onChange={(e) => handleInputChange('custom_description_color_enabled', e.target.checked)}
+                    />
+                    <Label htmlFor="custom_description_color_enabled">Use Custom Description Color</Label>
+                  </div>
+                  
+                  {formData.custom_description_color_enabled && (
+                    <div className="space-y-2">
+                      <Label htmlFor="custom_description_color">Description Color</Label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="color"
+                          id="custom_description_color"
+                          value={formData.custom_description_color || '#000000'}
+                          onChange={(e) => handleInputChange('custom_description_color', e.target.value)}
+                          className="w-12 h-8 border rounded"
+                        />
+                        <Input
+                          value={formData.custom_description_color || '#000000'}
+                          onChange={(e) => handleInputChange('custom_description_color', e.target.value)}
+                          placeholder="#000000"
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Fill/Gradient Section - Hidden when mini is enabled */}
             {!formData.mini && (
-              <>
+              <Collapsible className="space-y-4">
+                <CollapsibleTrigger>
+                  <div className="flex items-center">
+                    <div className="w-5 h-5 mr-2 rounded bg-gradient-to-r from-blue-500 to-purple-500" />
+                    <span className="font-semibold">Fill & Gradient</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="gradient_type">Fill Type</Label>
@@ -553,7 +758,8 @@ export default function LinkEditor({
                     </>
                   )}
                 </div>
-              </>
+              </CollapsibleContent>
+            </Collapsible>
             )}
 
             <div className="flex space-x-2">

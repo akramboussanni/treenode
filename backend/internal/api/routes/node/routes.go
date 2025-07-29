@@ -32,6 +32,7 @@ func NewNodeRouter(userRepo *repo.UserRepo, tokenRepo *repo.TokenRepo, lockoutRe
 		r.Get("/{nodeID}/links/{linkName}", nr.HandleGetPublicLink)
 		r.Get("/subdomain/{subdomain}", nr.HandleGetNodeBySubdomain)
 		r.Get("/subdomain/{subdomain}/links", nr.HandleGetPublicLinksBySubdomain)
+		r.Get("/subdomain/{subdomain}/links/{linkName}", nr.HandleGetPublicLinkBySubdomain)
 		r.Get("/name/{name}", nr.HandleGetNodeByName)
 		r.Get("/name/{name}/links", nr.HandleGetPublicLinksByName)
 	})

@@ -36,6 +36,7 @@ export interface Link {
   name: string;
   display_name: string;
   link: string;
+  description: string;
   icon: string;
   visible: boolean;
   enabled: boolean;
@@ -46,6 +47,12 @@ export interface Link {
   created_at: number;
   updated_at: number;
   color_stops?: ColorStop[];
+  custom_accent_color_enabled: boolean;
+  custom_accent_color: string;
+  custom_title_color_enabled: boolean;
+  custom_title_color: string;
+  custom_description_color_enabled: boolean;
+  custom_description_color: string;
 }
 
 export interface ColorStop {
@@ -81,23 +88,37 @@ export interface CreateLinkRequest {
   display_name: string;
   link: string;
   name?: string;
+  description?: string;
   icon?: string;
   visible?: boolean;
   enabled?: boolean;
   mini?: boolean;
   gradient_type?: string;
   gradient_angle?: number;
+  custom_accent_color_enabled?: boolean;
+  custom_accent_color?: string;
+  custom_title_color_enabled?: boolean;
+  custom_title_color?: string;
+  custom_description_color_enabled?: boolean;
+  custom_description_color?: string;
 }
 
 export interface UpdateLinkRequest {
   display_name?: string;
   link?: string;
+  description?: string;
   icon?: string;
   visible?: boolean;
   enabled?: boolean;
   mini?: boolean;
   gradient_type?: string;
   gradient_angle?: number;
+  custom_accent_color_enabled?: boolean;
+  custom_accent_color?: string;
+  custom_title_color_enabled?: boolean;
+  custom_title_color?: string;
+  custom_description_color_enabled?: boolean;
+  custom_description_color?: string;
 }
 
 export interface LoginRequest {

@@ -52,32 +52,45 @@ func (nr *NodeRouter) HandleCreateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate that at least one of name or link is provided
+	if req.Name == "" && req.Link == "" {
+		api.WriteMessage(w, 400, "error", "Please provide either a link name or URL")
+		return
+	}
+
 	if req.Name != "" {
-		exists, err := nr.LinkRepo.CheckNameExists(r.Context(), req.Name)
+		exists, err := nr.LinkRepo.CheckNameExistsInNode(r.Context(), req.Name, nodeID)
 		if err != nil {
 			applog.Error("Failed to check name existence:", err)
 			api.WriteInternalError(w)
 			return
 		}
 		if exists {
-			api.WriteMessage(w, 409, "error", "Link name already exists")
+			api.WriteMessage(w, 409, "error", "Link name already exists in this node")
 			return
 		}
 	}
 
 	link := &model.Link{
-		ID:            utils.GenerateSnowflakeID(),
-		NodeID:        nodeID,
-		Name:          req.Name,
-		DisplayName:   req.DisplayName,
-		Link:          req.Link,
-		Icon:          req.Icon,
-		Visible:       req.Visible,
-		Enabled:       req.Enabled,
-		Mini:          req.Mini,
-		CreatedAt:     time.Now().UTC().Unix(),
-		GradientType:  req.GradientType,
-		GradientAngle: req.GradientAngle,
+		ID:                            utils.GenerateSnowflakeID(),
+		NodeID:                        nodeID,
+		Name:                          req.Name,
+		DisplayName:                   req.DisplayName,
+		Link:                          req.Link,
+		Description:                   req.Description,
+		Icon:                          req.Icon,
+		Visible:                       req.Visible,
+		Enabled:                       req.Enabled,
+		Mini:                          req.Mini,
+		CreatedAt:                     time.Now().UTC().Unix(),
+		GradientType:                  req.GradientType,
+		GradientAngle:                 req.GradientAngle,
+		CustomAccentColorEnabled:      req.CustomAccentColorEnabled != nil && *req.CustomAccentColorEnabled,
+		CustomAccentColor:             req.CustomAccentColor,
+		CustomTitleColorEnabled:       req.CustomTitleColorEnabled != nil && *req.CustomTitleColorEnabled,
+		CustomTitleColor:              req.CustomTitleColor,
+		CustomDescriptionColorEnabled: req.CustomDescriptionColorEnabled != nil && *req.CustomDescriptionColorEnabled,
+		CustomDescriptionColor:        req.CustomDescriptionColor,
 	}
 
 	err = nr.LinkRepo.CreateLink(r.Context(), link)
@@ -286,26 +299,37 @@ func (nr *NodeRouter) HandleUpdateLink(w http.ResponseWriter, r *http.Request) {
 	if req.DisplayName != "" {
 		link.DisplayName = req.DisplayName
 	}
-	if req.Link != "" {
-		link.Link = req.Link
-	}
+	link.Link = req.Link
+	link.Description = req.Description
 	if req.Icon != "" {
 		link.Icon = req.Icon
 	}
-	if req.Visible != nil {
-		link.Visible = *req.Visible
-	}
-	if req.Enabled != nil {
-		link.Enabled = *req.Enabled
-	}
-	if req.Mini != nil {
-		link.Mini = *req.Mini
-	}
+	link.Visible = req.Visible
+	link.Enabled = req.Enabled
+	link.Mini = req.Mini
 	if req.GradientType != "" {
 		link.GradientType = req.GradientType
 	}
 	if req.GradientAngle != 0 {
 		link.GradientAngle = req.GradientAngle
+	}
+	if req.CustomAccentColorEnabled != nil {
+		link.CustomAccentColorEnabled = *req.CustomAccentColorEnabled
+	}
+	if req.CustomAccentColor != "" {
+		link.CustomAccentColor = req.CustomAccentColor
+	}
+	if req.CustomTitleColorEnabled != nil {
+		link.CustomTitleColorEnabled = *req.CustomTitleColorEnabled
+	}
+	if req.CustomTitleColor != "" {
+		link.CustomTitleColor = req.CustomTitleColor
+	}
+	if req.CustomDescriptionColorEnabled != nil {
+		link.CustomDescriptionColorEnabled = *req.CustomDescriptionColorEnabled
+	}
+	if req.CustomDescriptionColor != "" {
+		link.CustomDescriptionColor = req.CustomDescriptionColor
 	}
 
 	if len(req.ColorStops) > 0 {

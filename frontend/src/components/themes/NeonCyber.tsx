@@ -1,136 +1,191 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useRef, useEffect } from "react";
 import { ThemeProps } from './types';
 
-interface NeonParticle {
-  id: number;
+type CanvasStrokeStyle = string | CanvasGradient | CanvasPattern;
+
+interface GridOffset {
   x: number;
   y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
 }
 
-const PARTICLE_COUNT = 25;
+interface SquaresProps {
+  direction?: "diagonal" | "up" | "right" | "down" | "left";
+  speed?: number;
+  borderColor?: CanvasStrokeStyle;
+  squareSize?: number;
+  hoverFillColor?: CanvasStrokeStyle;
+  previewMode?: boolean;
+}
 
-export default function NeonCyber({ 
-  accentColor = '#00ffff', 
-  mouseEffectsEnabled = true
-}: ThemeProps) {
-  const [particles, setParticles] = useState<NeonParticle[]>([]);
-  const mouseRef = useRef({ x: 0, y: 0 });
-  const animationId = useRef<number | undefined>(undefined);
-  const particlesRef = useRef<NeonParticle[]>([]);
-
-  // Initialize particles
-  useEffect(() => {
-    const data = [];
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      data.push({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        life: Math.random(),
-        maxLife: Math.random() * 0.5 + 0.5,
-      });
-    }
-    setParticles(data);
-    particlesRef.current = data;
-  }, []);
-
-  // Track mouse
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!mouseEffectsEnabled) return;
-    const rect = document.body.getBoundingClientRect();
-    mouseRef.current.x = ((e.clientX - rect.left) / rect.width) * 100;
-    mouseRef.current.y = ((e.clientY - rect.top) / rect.height) * 100;
-  }, [mouseEffectsEnabled]);
+const Squares: React.FC<SquaresProps> = ({
+  direction = "right",
+  speed = 1,
+  borderColor = "#999",
+  squareSize = 40,
+  hoverFillColor = "#222",
+  previewMode = false,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const requestRef = useRef<number | null>(null);
+  const numSquaresX = useRef<number>(0);
+  const numSquaresY = useRef<number>(0);
+  const gridOffset = useRef<GridOffset>({ x: 0, y: 0 });
+  const hoveredSquareRef = useRef<GridOffset | null>(null);
 
   useEffect(() => {
-    if (mouseEffectsEnabled) {
-      document.addEventListener('mousemove', handleMouseMove, { passive: true });
-      return () => document.removeEventListener('mousemove', handleMouseMove);
-    }
-  }, [handleMouseMove, mouseEffectsEnabled]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
 
-  // Animate particles
-  useEffect(() => {
-    if (particles.length === 0) return;
-
-    const loop = () => {
-      // Update particles
-      particlesRef.current = particlesRef.current.map(particle => {
-        // Update position
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-        
-        // Bounce off edges
-        if (particle.x < 0 || particle.x > 100) particle.vx *= -1;
-        if (particle.y < 0 || particle.y > 100) particle.vy *= -1;
-        
-        // Update life
-        particle.life += 0.01;
-        if (particle.life > particle.maxLife) {
-          particle.life = 0;
-          particle.x = Math.random() * 100;
-          particle.y = Math.random() * 100;
-        }
-        
-        return particle;
-      });
-
-      animationId.current = requestAnimationFrame(loop);
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      numSquaresX.current = Math.ceil(canvas.width / squareSize) + 1;
+      numSquaresY.current = Math.ceil(canvas.height / squareSize) + 1;
     };
-    animationId.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(animationId.current!);
-  }, [particles.length, mouseEffectsEnabled]);
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const drawGrid = () => {
+      if (!ctx) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const startX = Math.floor(gridOffset.current.x / squareSize) * squareSize;
+      const startY = Math.floor(gridOffset.current.y / squareSize) * squareSize;
+
+      for (let x = startX; x < canvas.width + squareSize; x += squareSize) {
+        for (let y = startY; y < canvas.height + squareSize; y += squareSize) {
+          const squareX = x - (gridOffset.current.x % squareSize);
+          const squareY = y - (gridOffset.current.y % squareSize);
+
+          if (
+            hoveredSquareRef.current &&
+            Math.floor((x - startX) / squareSize) ===
+              hoveredSquareRef.current.x &&
+            Math.floor((y - startY) / squareSize) === hoveredSquareRef.current.y
+          ) {
+            ctx.fillStyle = hoverFillColor;
+            ctx.fillRect(squareX, squareY, squareSize, squareSize);
+          }
+
+          ctx.strokeStyle = borderColor;
+          ctx.strokeRect(squareX, squareY, squareSize, squareSize);
+        }
+      }
+
+      const gradient = ctx.createRadialGradient(
+        canvas.width / 2,
+        canvas.height / 2,
+        0,
+        canvas.width / 2,
+        canvas.height / 2,
+        Math.sqrt(canvas.width ** 2 + canvas.height ** 2) / 2
+      );
+      gradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+      gradient.addColorStop(1, "#060010");
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
+    const updateAnimation = () => {
+      const effectiveSpeed = Math.max(speed, 0.1);
+      switch (direction) {
+        case "right":
+          gridOffset.current.x =
+            (gridOffset.current.x - effectiveSpeed + squareSize) % squareSize;
+          break;
+        case "left":
+          gridOffset.current.x =
+            (gridOffset.current.x + effectiveSpeed + squareSize) % squareSize;
+          break;
+        case "up":
+          gridOffset.current.y =
+            (gridOffset.current.y + effectiveSpeed + squareSize) % squareSize;
+          break;
+        case "down":
+          gridOffset.current.y =
+            (gridOffset.current.y - effectiveSpeed + squareSize) % squareSize;
+          break;
+        case "diagonal":
+          gridOffset.current.x =
+            (gridOffset.current.x - effectiveSpeed + squareSize) % squareSize;
+          gridOffset.current.y =
+            (gridOffset.current.y - effectiveSpeed + squareSize) % squareSize;
+          break;
+        default:
+          break;
+      }
+
+      drawGrid();
+      requestRef.current = requestAnimationFrame(updateAnimation);
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+
+      const startX = Math.floor(gridOffset.current.x / squareSize) * squareSize;
+      const startY = Math.floor(gridOffset.current.y / squareSize) * squareSize;
+
+      const hoveredSquareX = Math.floor(
+        (mouseX + gridOffset.current.x - startX) / squareSize
+      );
+      const hoveredSquareY = Math.floor(
+        (mouseY + gridOffset.current.y - startY) / squareSize
+      );
+
+      if (
+        !hoveredSquareRef.current ||
+        hoveredSquareRef.current.x !== hoveredSquareX ||
+        hoveredSquareRef.current.y !== hoveredSquareY
+      ) {
+        hoveredSquareRef.current = { x: hoveredSquareX, y: hoveredSquareY };
+      }
+    };
+
+    const handleMouseLeave = () => {
+      hoveredSquareRef.current = null;
+    };
+
+    canvas.addEventListener("mousemove", handleMouseMove);
+    canvas.addEventListener("mouseleave", handleMouseLeave);
+    requestRef.current = requestAnimationFrame(updateAnimation);
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+      canvas.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [direction, speed, borderColor, hoverFillColor, squareSize]);
 
   return (
-    <div className="fixed inset-0 z-0 neon-cyber-bg">
-      {/* Grid lines */}
-      <div className="absolute inset-0 cyber-grid" />
-      
-      {/* Glow effect */}
-      <div 
-        className="absolute inset-0 cyber-glow"
-        style={{
-          background: `radial-gradient(circle at 50% 50%, ${accentColor}10 0%, transparent 70%)`
-        }}
-      />
-      
-      {/* Particles */}
-      {particlesRef.current.map(particle => {
-        const lifeRatio = particle.life / particle.maxLife;
-        const opacity = Math.sin(lifeRatio * Math.PI) * 0.8 + 0.2;
-        
-        return (
-          <div
-            key={particle.id}
-            className="absolute neon-particle"
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-              opacity,
-              backgroundColor: accentColor,
-              boxShadow: `0 0 10px ${accentColor}, 0 0 20px ${accentColor}`,
-            }}
-          />
-        );
-      })}
-      
-      {/* Mouse cursor glow */}
-      <div 
-        className="absolute mouse-glow"
-        style={{
-          left: `${mouseRef.current.x}%`,
-          top: `${mouseRef.current.y}%`,
-          background: `radial-gradient(circle, ${accentColor}40 0%, transparent 70%)`,
-        }}
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      className={`${previewMode ? 'absolute inset-0' : 'fixed inset-0 z-0'} w-full h-full border-none block`}
+    ></canvas>
+  );
+};
+
+export default function NeonCyber({ 
+  themeColor = '#4f46e5',
+  mouseEffectsEnabled = true,
+  previewMode = false
+}: ThemeProps) {
+  return (
+    <Squares
+      direction="diagonal"
+      speed={1}
+      borderColor={themeColor}
+      squareSize={40}
+      hoverFillColor={mouseEffectsEnabled ? "#222" : "transparent"}
+      previewMode={previewMode}
+    />
   );
 } 

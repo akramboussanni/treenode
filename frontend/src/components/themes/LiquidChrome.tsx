@@ -5,8 +5,10 @@ import { Renderer, Program, Mesh, Triangle } from 'ogl';
 import { ThemeProps } from './types';
 
 export default function LiquidChrome({ 
-  accentColor = '#4f46e5', 
-  mouseEffectsEnabled = true
+  themeColor = '#4f46e5', 
+  accentColor = '#4f46e5',
+  mouseEffectsEnabled = true,
+  previewMode = false
 }: ThemeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -83,7 +85,7 @@ export default function LiquidChrome({
     `;
 
     const geometry = new Triangle(gl);
-    const baseColor = hexToRgb(accentColor);
+    const baseColor = hexToRgb(themeColor);
     const program = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,
@@ -169,12 +171,12 @@ export default function LiquidChrome({
       }
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [accentColor, mouseEffectsEnabled]);
+  }, [themeColor, accentColor, mouseEffectsEnabled]);
 
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-0 liquid-chrome-bg"
+      className={`${previewMode ? 'absolute inset-0' : 'fixed inset-0 z-0'} liquid-chrome-bg`}
     />
   );
 } 

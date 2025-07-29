@@ -25,7 +25,8 @@ uniform vec2 uFocal;
 uniform vec2 uRotation;
 uniform float uStarSpeed;
 uniform float uDensity;
-uniform float uHueShift;
+uniform vec3 uStarColor;
+uniform vec3 uBackgroundColor;
 uniform float uSpeed;
 uniform vec2 uMouse;
 uniform float uGlowIntensity;
@@ -103,11 +104,11 @@ vec3 StarLayer(vec2 uv) {
       float grn = min(red, blu) * seed;
       vec3 base = vec3(red, grn, blu);
       
-      float hue = atan(base.g - base.r, base.b - base.r) / (2.0 * 3.14159) + 0.5;
-      hue = fract(hue + uHueShift / 360.0);
-      float sat = length(base - vec3(dot(base, vec3(0.299, 0.587, 0.114)))) * uSaturation;
-      float val = max(max(base.r, base.g), base.b);
-      base = hsv2rgb(vec3(hue, sat, val));
+      // Use the theme color for stars with some variation
+      vec3 starColor = uStarColor;
+      float variation = fract(seed * 123.45);
+      starColor = mix(starColor, starColor * 1.2, variation * 0.3);
+      base = starColor;
 
       vec2 pad = vec2(tris(seed * 34.0 + uTime * uSpeed / 10.0), tris(seed * 38.0 + uTime * uSpeed / 30.0)) - 0.5;
 
@@ -152,7 +153,7 @@ void main() {
 
   uv = mat2(uRotation.x, -uRotation.y, uRotation.y, uRotation.x) * uv;
 
-  vec3 col = vec3(0.0);
+  vec3 col = uBackgroundColor;
 
   for (float i = 0.0; i < 1.0; i += 1.0 / NUM_LAYER) {
     float depth = fract(i + uStarSpeed * uSpeed);
@@ -172,9 +173,11 @@ void main() {
 }
 `;
 
-export default function Galaxy({ 
-  accentColor = '#4f46e5', 
-  mouseEffectsEnabled = true
+export default function Galaxy({
+  themeColor = '#4f46e5',
+  accentColor = '#4f46e5',
+  mouseEffectsEnabled = true,
+  previewMode = false
 }: ThemeProps) {
   const ctnDom = useRef<HTMLDivElement>(null);
   const targetMousePos = useRef({ x: 0.5, y: 0.5 });
@@ -182,60 +185,31 @@ export default function Galaxy({
   const targetMouseActive = useRef(0.0);
   const smoothMouseActive = useRef(0.0);
 
-  // Convert hex to hue shift
-  const hexToHue = (hex: string) => {
+  // Convert hex to RGB
+  const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if (!result) return 140;
+    if (!result) return [0.545, 0.361, 0.965]; // Default purple
     
-    const r = parseInt(result[1], 16) / 255;
-    const g = parseInt(result[2], 16) / 255;
-    const b = parseInt(result[3], 16) / 255;
-    
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0;
-    
-    if (max === min) return 140;
-    
-    const d = max - min;
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-    
-    return h * 60;
+    return [
+      parseInt(result[1], 16) / 255,
+      parseInt(result[2], 16) / 255,
+      parseInt(result[3], 16) / 255,
+    ];
   };
 
   useEffect(() => {
     if (!ctnDom.current) return;
     const ctn = ctnDom.current;
     const renderer = new Renderer({
-      alpha: true,
-      premultipliedAlpha: false,
+      alpha: false,
     });
     const gl = renderer.gl;
 
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.clearColor(0, 0, 0, 0);
-
-    function resize() {
-      const scale = 1;
-      renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
-      if (program) {
-        program.uniforms.uResolution.value = new Color(
-          gl.canvas.width,
-          gl.canvas.height,
-          gl.canvas.width / gl.canvas.height
-        );
-      }
-    }
-    window.addEventListener("resize", resize, false);
-    resize();
+    gl.clearColor(0, 0, 0, 1);
 
     const geometry = new Triangle(gl);
-    const hueShift = hexToHue(accentColor);
+    const starColor = hexToRgb(themeColor);
+    const backgroundColor = [0.05, 0.05, 0.1]; // Dark background
     const program: Program = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,
@@ -252,7 +226,8 @@ export default function Galaxy({
         uRotation: { value: new Float32Array([1.0, 0.0]) },
         uStarSpeed: { value: 0.5 },
         uDensity: { value: 1.0 },
-        uHueShift: { value: hueShift },
+        uStarColor: { value: new Color(...starColor) },
+        uBackgroundColor: { value: new Color(...backgroundColor) },
         uSpeed: { value: 1.0 },
         uMouse: {
           value: new Float32Array([
@@ -269,6 +244,20 @@ export default function Galaxy({
         uMouseActiveFactor: { value: 0.0 },
       },
     });
+
+    function resize() {
+      const scale = 1;
+      renderer.setSize(ctn.offsetWidth * scale, ctn.offsetHeight * scale);
+      if (program) {
+        program.uniforms.uResolution.value = new Color(
+          gl.canvas.width,
+          gl.canvas.height,
+          gl.canvas.width / gl.canvas.height
+        );
+      }
+    }
+    window.addEventListener("resize", resize, false);
+    resize();
 
     const mesh = new Mesh(gl, { geometry, program });
     let animateId: number;
@@ -327,12 +316,12 @@ export default function Galaxy({
       }
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [accentColor, mouseEffectsEnabled]);
+  }, [themeColor, accentColor, mouseEffectsEnabled]);
 
   return (
     <div
       ref={ctnDom}
-      className="fixed inset-0 z-0 galaxy-bg"
+      className={`${previewMode ? 'absolute inset-0' : 'fixed inset-0 z-0'} galaxy-bg`}
     />
   );
 } 

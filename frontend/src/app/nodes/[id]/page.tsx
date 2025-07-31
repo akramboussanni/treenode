@@ -63,7 +63,8 @@ const getThemeDisplayName = (themeId: string): string => {
     'galaxy': 'Galaxy',
     'iridescence': 'Iridescence',
     'lightning': 'Lightning',
-    'dither': 'Dither'
+    'dither': 'Dither',
+    'smartguy': 'Smart Guy'
   };
   return themeMap[themeId] || themeId;
 };

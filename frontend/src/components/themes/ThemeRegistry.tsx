@@ -18,6 +18,7 @@ import Beams from './Beams';
 import BallpitTheme from './Ballpit';
 import Waves from './Waves';
 import Dither from './Dither';
+import SmartGuy from './SmartGuy';
 
 // Theme component type
 type ThemeComponent = React.ComponentType<ThemeProps>;
@@ -39,6 +40,7 @@ const themeRegistry: Record<string, ThemeComponent> = {
   'love': withBaseTheme(LoveTheme),
   'waves': withBaseTheme(Waves),
   'dither': withBaseTheme(Dither),
+  'smartguy': withBaseTheme(SmartGuy),
 };
 
 // Theme component that renders the appropriate theme based on theme name

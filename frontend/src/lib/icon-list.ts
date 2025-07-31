@@ -1,259 +1,217 @@
-// Centralized icon list for the application
-// This file contains all available icons that can be used throughout the app
+// Single source of truth for all icons in Treenode
+// This file defines all available icons and their types
 
-export const ICON_LIST = [
-  // Social Media (Lucide)
-  'twitter',
-  'github',
-  'linkedin',
-  'instagram',
-  'youtube',
-  'facebook',
+// Simple Icons (social media platforms)
+export const SIMPLE_ICONS = {
+  // Social Media
+  'facebook': 'facebook',
+  'twitter': 'x', 
+  'instagram': 'instagram',
+  'youtube': 'youtube',
+  'tiktok': 'tiktok',
+  'snapchat': 'snapchat',
+  'discord': 'discord',
+  'telegram': 'telegram',
+  'whatsapp': 'whatsapp',
+  'reddit': 'reddit',
+  'pinterest': 'pinterest',
+  'twitch': 'twitch',
+  'spotify': 'spotify',
+  'github': 'github',
+  'medium': 'medium',
+  'dribbble': 'dribbble',
+  'behance': 'behance',
+  'flickr': 'flickr',
+  'vimeo': 'vimeo',
+  'stackoverflow': 'stackoverflow',
+  'figma': 'figma',
+  'slack': 'slack',
+  'zoom': 'zoom',
+  'dropbox': 'dropbox',
+  'notion': 'notion',
+  'trello': 'trello',
+  'gitlab': 'gitlab',
+  'bitbucket': 'bitbucket',
+  'docker': 'docker',
+  'vercel': 'vercel',
+  'netlify': 'netlify',
+  'stripe': 'stripe',
+  'paypal': 'paypal',
+  'wordpress': 'wordpress',
+  'shopify': 'shopify',
+} as const;
+
+// Lucide Icons (general UI icons)
+export const LUCIDE_ICONS = {
+  // Communication
+  'mail': 'Mail',
+  'message-circle': 'MessageCircle',
+  'phone': 'Phone',
+  'globe': 'Globe',
+  'link': 'Link',
+  'external-link': 'ExternalLink',
+  'share': 'Share2',
+  'copy': 'Copy',
+  'linkedin': 'Linkedin',
   
-  // Social Media (Simple Icons)
-  'tiktok',
-  'discord',
-  'twitch',
-  'reddit',
-  'snapchat',
-  'whatsapp',
-  'telegram',
-  'spotify',
-  'pinterest',
-  'tumblr',
-  'vimeo',
-  'dailymotion',
-  'vk',
-  'wechat',
-  'line',
-  'kakao',
-  'naver',
+  // Social
+  'camera': 'Camera',
+  'video': 'Video',
+  'mic': 'Mic',
+  'headphones': 'Headphones',
+  'music': 'Music',
+  'play': 'Play',
+  'pause': 'Pause',
   
-  // Tech Platforms
-  'stackoverflow',
-  'medium',
-  'hashnode',
-  'substack',
-  'notion',
-  'figma',
-  'slack',
-  'zoom',
+  // Business
+  'briefcase': 'Briefcase',
+  'building': 'Building',
+  'map-pin': 'MapPin',
+  'calendar': 'Calendar',
+  'clock': 'Clock',
+  'star': 'Star',
+  'heart': 'Heart',
+  'thumbs-up': 'ThumbsUp',
   
-  // Cloud & Storage
-  'dropbox',
-  'googledrive',
-  'box',
-  'evernote',
-  'trello',
-  'asana',
-  'jira',
-  'confluence',
-  'bitbucket',
-  'gitlab',
+  // Tech
+  'code': 'Code',
+  'terminal': 'Terminal',
+  'database': 'Database',
+  'server': 'Server',
+  'cpu': 'Cpu',
+  'smartphone': 'Smartphone',
+  'laptop': 'Laptop',
+  'monitor': 'Monitor',
   
-  // Development & DevOps
-  'docker',
-  'kubernetes',
-  'heroku',
-  'vercel',
-  'netlify',
-  'cloudflare',
-  'digitalocean',
-  'vultr',
-  
-  // Payment & E-commerce
-  'stripe',
-  'paypal',
-  'square',
-  'shopify',
-  'woo',
-  'prestashop',
-  
-  // CMS & Website Builders
-  'wordpress',
-  'drupal',
-  'joomla',
-  'wix',
-  'squarespace',
-  'webflow',
-  
-  // Automation & IoT
-  'zapier',
-  'ifttt',
-  'make',
-  'n8n',
-  'nodered',
-  'homeassistant',
-  'openhab',
-  'homebridge',
-  'tasmota',
-  'esphome',
-  
-  // Hardware & IoT
-  'arduino',
-  'raspberrypi',
-  'arm',
-  'intel',
-  'amd',
-  'nvidia',
-  'qualcomm',
-  'mediatek',
-  'broadcom',
-  'stmicroelectronics',
-  'nxp',
-  'samsung',
-  'lg',
-  'sony',
-  'sharp',
-  'toshiba',
-  'hitachi',
-  'mitsubishi',
-  'fujitsu',
-  'nec',
-  'epson',
-  'hp',
-  'dell',
-  'lenovo',
-  'asus',
-  'acer',
-  'msi',
-  'corsair',
-  'coolermaster',
-  'nzxt',
-  'seasonic',
-  'fsp',
-  'biostar',
-  'ecs',
-  'foxconn',
-  
-  // General
-  'globe',
-  'mail',
-  'phone',
-  'mapPin',
-  'calendar',
-  'heart',
-  'star',
-  'home',
-  'user',
-  'settings',
-  'link',
-  'externalLink',
-  
-  // Actions
-  'download',
-  'upload',
-  'share',
-  'copy',
-  'edit',
-  'trash',
-  'plus',
-  'minus',
-  'check',
-  'x',
+  // Content
+  'file-text': 'FileText',
+  'image': 'Image',
+  'video-off': 'VideoOff',
+  'book': 'Book',
+  'newspaper': 'Newspaper',
+  'rss': 'Rss',
+  'download': 'Download',
+  'upload': 'Upload',
   
   // UI
-  'alertCircle',
-  'info',
-  'helpCircle',
-  'search',
-  'filter',
-  'grid',
-  'list',
-  'eye',
-  'eyeOff',
+  'home': 'Home',
+  'user': 'User',
+  'users': 'Users',
+  'settings': 'Settings',
+  'search': 'Search',
+  'menu': 'Menu',
+  'x': 'X',
+  'plus': 'Plus',
+  'minus': 'Minus',
+  'check': 'Check',
+  'chevron-right': 'ChevronRight',
+  'chevron-left': 'ChevronLeft',
+  'arrow-right': 'ArrowRight',
+  'arrow-left': 'ArrowLeft',
+  'arrow-up': 'ArrowUp',
+  'arrow-down': 'ArrowDown',
   
-  // Security
-  'lock',
-  'unlock',
-  'key',
-  'shield',
+  // Actions
+  'edit': 'Edit',
+  'trash': 'Trash2',
+  'eye': 'Eye',
+  'eye-off': 'EyeOff',
+  'lock': 'Lock',
+  'unlock': 'Unlock',
+  'key': 'Key',
+  'shield': 'Shield',
   
   // Media
-  'camera',
-  'image',
-  'video',
-  'music',
-  
-  // Files
-  'file',
-  'folder',
-  'database',
-  'server',
-  'cloud',
-  
-  // Technology
-  'wifi',
-  'bluetooth',
-  'smartphone',
-  'tablet',
-  'monitor',
-  'laptop',
-  'printer',
-  'keyboard',
-  'mouse',
-  'headphones',
-  'speaker',
+  'file': 'File',
+  'folder': 'Folder',
+  'cloud': 'Cloud',
+  'wifi': 'Wifi',
+  'bluetooth': 'Bluetooth',
+  'tablet': 'Tablet',
+  'printer': 'Printer',
+  'keyboard': 'Keyboard',
+  'mouse': 'Mouse',
+  'speaker': 'Speaker',
   
   // Gaming
-  'gamepad',
-  'puzzle',
-  'trophy',
-  'medal',
-  'award',
+  'gamepad': 'Gamepad2',
+  'puzzle': 'Puzzle',
+  'trophy': 'Trophy',
+  'medal': 'Medal',
+  'award': 'Award',
   
   // Commerce
-  'gift',
-  'package',
-  'shoppingCart',
-  'creditCard',
-  'dollarSign',
-  'euro',
-  'bitcoin',
+  'gift': 'Gift',
+  'package': 'Package',
+  'shopping-cart': 'ShoppingCart',
+  'credit-card': 'CreditCard',
+  'dollar-sign': 'DollarSign',
+  'euro': 'Euro',
+  'bitcoin': 'Bitcoin',
   
   // Analytics
-  'trendingUp',
-  'trendingDown',
-  'barChart',
-  'pieChart',
-  'activity',
+  'trending-up': 'TrendingUp',
+  'trending-down': 'TrendingDown',
+  'bar-chart': 'BarChart3',
+  'pie-chart': 'PieChart',
+  'activity': 'Activity',
   
   // Symbols
-  'zap',
-  'target',
-  'flag',
-  'bookmark',
-  'tag',
-  'hash',
-  'atSign',
-  'percent',
-  'infinity',
-  'pi',
-  'sigma',
-  'omega',
+  'zap': 'Zap',
+  'target': 'Target',
+  'flag': 'Flag',
+  'bookmark': 'Bookmark',
+  'tag': 'Tag',
+  'hash': 'Hash',
+  'at-sign': 'AtSign',
+  'percent': 'Percent',
+  'infinity': 'Infinity',
+  'pi': 'Pi',
+  'sigma': 'Sigma',
+  'omega': 'Omega',
+} as const;
+
+// Combined icon list for backward compatibility
+export const ICON_LIST = [
+  ...Object.keys(SIMPLE_ICONS),
+  ...Object.keys(LUCIDE_ICONS),
 ] as const;
 
-export type IconName = typeof ICON_LIST[number];
+// Type definitions
+export type SimpleIconName = keyof typeof SIMPLE_ICONS;
+export type LucideIconName = keyof typeof LUCIDE_ICONS;
+export type IconName = SimpleIconName | LucideIconName;
 
-// Icon categories for better organization
+// Helper functions
+export function isSimpleIcon(iconName: string): iconName is SimpleIconName {
+  return iconName in SIMPLE_ICONS;
+}
+
+export function isLucideIcon(iconName: string): iconName is LucideIconName {
+  return iconName in LUCIDE_ICONS;
+}
+
+export function getSimpleIconSlug(iconName: SimpleIconName): string {
+  return SIMPLE_ICONS[iconName];
+}
+
+export function getLucideIconName(iconName: LucideIconName): string {
+  return LUCIDE_ICONS[iconName];
+}
+
+// Icon categories for UI organization
 export const ICON_CATEGORIES = {
-  'Social Media': ['twitter', 'github', 'linkedin', 'instagram', 'youtube', 'facebook', 'tiktok', 'discord', 'twitch', 'reddit', 'snapchat', 'whatsapp', 'telegram', 'spotify', 'pinterest', 'tumblr', 'vimeo', 'dailymotion', 'vk', 'wechat', 'line', 'kakao', 'naver'],
-  'Tech Platforms': ['stackoverflow', 'medium', 'hashnode', 'substack', 'notion', 'figma', 'slack', 'zoom'],
-  'Cloud & Storage': ['dropbox', 'googledrive', 'box', 'evernote', 'trello', 'asana', 'jira', 'confluence', 'bitbucket', 'gitlab'],
-  'Development & DevOps': ['docker', 'kubernetes', 'heroku', 'vercel', 'netlify', 'cloudflare', 'digitalocean', 'vultr'],
-  'Payment & E-commerce': ['stripe', 'paypal', 'square', 'shopify', 'woo', 'prestashop'],
-  'CMS & Website Builders': ['wordpress', 'drupal', 'joomla', 'wix', 'squarespace', 'webflow'],
-  'Automation & IoT': ['zapier', 'ifttt', 'make', 'n8n', 'nodered', 'homeassistant', 'openhab', 'homebridge', 'tasmota', 'esphome'],
-  'Hardware & IoT': ['arduino', 'raspberrypi', 'arm', 'intel', 'amd', 'nvidia', 'qualcomm', 'mediatek', 'broadcom', 'stmicroelectronics', 'nxp', 'samsung', 'lg', 'sony', 'sharp', 'toshiba', 'hitachi', 'mitsubishi', 'fujitsu', 'nec', 'epson', 'hp', 'dell', 'lenovo', 'asus', 'acer', 'msi', 'corsair', 'coolermaster', 'nzxt', 'seasonic', 'fsp', 'biostar', 'ecs', 'foxconn'],
-  'General': ['globe', 'mail', 'phone', 'mapPin', 'calendar', 'heart', 'star', 'home', 'user', 'settings', 'link', 'externalLink'],
-  'Actions': ['download', 'upload', 'share', 'copy', 'edit', 'trash', 'plus', 'minus', 'check', 'x'],
-  'UI': ['alertCircle', 'info', 'helpCircle', 'search', 'filter', 'grid', 'list', 'eye', 'eyeOff'],
-  'Security': ['lock', 'unlock', 'key', 'shield'],
-  'Media': ['camera', 'image', 'video', 'music'],
-  'Files': ['file', 'folder', 'database', 'server', 'cloud'],
-  'Technology': ['wifi', 'bluetooth', 'smartphone', 'tablet', 'monitor', 'laptop', 'printer', 'keyboard', 'mouse', 'headphones', 'speaker'],
+  'Social Media': Object.keys(SIMPLE_ICONS),
+  'Communication': ['mail', 'message-circle', 'phone', 'globe', 'link', 'external-link', 'share', 'copy', 'linkedin'],
+  'Social': ['camera', 'video', 'mic', 'headphones', 'music', 'play', 'pause'],
+  'Business': ['briefcase', 'building', 'map-pin', 'calendar', 'clock', 'star', 'heart', 'thumbs-up'],
+  'Tech': ['code', 'terminal', 'database', 'server', 'cpu', 'smartphone', 'laptop', 'monitor'],
+  'Content': ['file-text', 'image', 'video-off', 'book', 'newspaper', 'rss', 'download', 'upload'],
+  'UI': ['home', 'user', 'users', 'settings', 'search', 'menu', 'x', 'plus', 'minus', 'check'],
+  'Actions': ['edit', 'trash', 'eye', 'eye-off', 'lock', 'unlock', 'key', 'shield'],
+  'Media': ['file', 'folder', 'cloud', 'wifi', 'bluetooth', 'tablet', 'printer', 'keyboard', 'mouse', 'speaker'],
   'Gaming': ['gamepad', 'puzzle', 'trophy', 'medal', 'award'],
-  'Commerce': ['gift', 'package', 'shoppingCart', 'creditCard', 'dollarSign', 'euro', 'bitcoin'],
-  'Analytics': ['trendingUp', 'trendingDown', 'barChart', 'pieChart', 'activity'],
-  'Symbols': ['zap', 'target', 'flag', 'bookmark', 'tag', 'hash', 'atSign', 'percent', 'infinity', 'pi', 'sigma', 'omega'],
+  'Commerce': ['gift', 'package', 'shopping-cart', 'credit-card', 'dollar-sign', 'euro', 'bitcoin'],
+  'Analytics': ['trending-up', 'trending-down', 'bar-chart', 'pie-chart', 'activity'],
+  'Symbols': ['zap', 'target', 'flag', 'bookmark', 'tag', 'hash', 'at-sign', 'percent', 'infinity', 'pi', 'sigma', 'omega'],
 } as const; 

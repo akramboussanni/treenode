@@ -16,7 +16,8 @@ import {
   Image,
   Settings
 } from 'lucide-react';
-import { getIcon, getIconList } from '@/lib/icons';
+import { ICON_LIST } from '@/lib/icons';
+import TreenodeIcon from '@/components/TreenodeIcon';
 import { Link as LinkType } from '@/types';
 import { config } from '@/config';
 
@@ -353,7 +354,10 @@ export default function LinkEditor({
                     <div className="flex-1 p-2 border rounded-md bg-cottage-cream flex items-center space-x-2">
                       {formData.icon ? (
                         <>
-                          {React.createElement(getIcon(formData.icon), { className: "h-5 w-5" })}
+                          <TreenodeIcon 
+                            icon={formData.icon}
+                            className="h-5 w-5"
+                          />
                           <span className="text-sm text-muted-foreground">{formData.icon}</span>
                         </>
                       ) : (
@@ -827,11 +831,11 @@ export default function LinkEditor({
 
             {/* Icons Grid */}
             <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-96 overflow-y-auto">
-              {getIconList()
-                .filter(iconId => 
+              {ICON_LIST
+                .filter((iconId: string) => 
                   iconId.toLowerCase().includes(iconSearchTerm.toLowerCase())
                 )
-                .map(iconId => (
+                .map((iconId: string) => (
                   <button
                     key={iconId}
                     onClick={() => {
@@ -841,7 +845,10 @@ export default function LinkEditor({
                     }}
                     className="p-3 border rounded-lg hover:bg-accent hover:border-primary transition-colors flex flex-col items-center space-y-1"
                   >
-                    {React.createElement(getIcon(iconId), { className: "h-6 w-6" })}
+                    <TreenodeIcon 
+                      icon={iconId}
+                      className="h-6 w-6"
+                    />
                     <span className="text-xs text-muted-foreground truncate w-full text-center">
                       {iconId}
                     </span>

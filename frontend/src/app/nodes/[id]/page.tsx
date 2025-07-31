@@ -38,7 +38,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { apiClient } from '@/lib/api';
 import { Node, Link as LinkType } from '@/types';
-import { getIcon } from '@/lib/icons';
+import TreenodeIcon from '@/components/TreenodeIcon';
 import { config } from '@/config';
 import LinkEditor from '@/components/LinkEditor';
 import ThemeSelector from '@/components/ThemeSelector';
@@ -902,7 +902,7 @@ export default function NodeManagementPage() {
                 </CollapsibleContent>
               </Collapsible>
 
-                            {/* Display Options Section */}
+              {/* Display Options Section */}
               <Collapsible className="space-y-4">
                 <CollapsibleTrigger>
                   <div className="flex items-center">
@@ -1007,7 +1007,10 @@ export default function NodeManagementPage() {
                     <div className="flex items-center justify-between link-card-actions">
                       <div className="flex items-center space-x-4">
                         <div className="text-2xl">
-                          {React.createElement(getIcon(link.icon), { className: "h-6 w-6" })}
+                          <TreenodeIcon 
+                            icon={link.icon}
+                            className="h-6 w-6"
+                          />
                         </div>
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-foreground">

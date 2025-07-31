@@ -84,7 +84,7 @@ func (nr *NodeRouter) HandleCreateNode(w http.ResponseWriter, r *http.Request) {
 		Domain:              "",
 		DomainVerified:      false,
 		MouseEffectsEnabled: true,
-		TextShadowsEnabled:  true,
+		TextShadowsEnabled:  false,
 		ShowShareButton:     true,
 		CreatedAt:           time.Now().UTC().Unix(),
 		UpdatedAt:           time.Now().UTC().Unix(),

@@ -189,7 +189,7 @@ const sampleNodes: { node: Node; links: LinkType[] }[] = [
     node: {
       id: "3",
       owner_id: "3",
-      display_name: "Emma Thompson",
+      display_name: "Marame Thompson",
       subdomain_name: "emma",
       description: "Content Creator & Influencer",
       background_color: "#2d5016",
@@ -202,7 +202,7 @@ const sampleNodes: { node: Node; links: LinkType[] }[] = [
       mouse_effects_enabled: true,
       text_shadows_enabled: true,
       hide_powered_by: false,
-      page_title: "Emma Thompson's Links",
+      page_title: "Marame Thompson's Links",
       domain: "",
       domain_verified: false,
       created_at: 0,

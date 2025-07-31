@@ -30,7 +30,9 @@ import {
   Sparkles,
   Eye as EyeIcon,
   ExternalLink,
-  XCircle
+  XCircle,
+  Download,
+  Upload
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
@@ -98,6 +100,7 @@ export default function NodeManagementPage() {
   const [showLinkEditor, setShowLinkEditor] = useState(false);
   const [editingLink, setEditingLink] = useState<LinkType | null>(null);
   const [deletingLink, setDeletingLink] = useState<string | null>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [invitingEmail, setInvitingEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
@@ -546,6 +549,194 @@ export default function NodeManagementPage() {
     });
   };
 
+  const handleExportNode = () => {
+    if (!node || !links) return;
+
+    const exportData = {
+      node: {
+        display_name: node.display_name,
+        subdomain_name: node.subdomain_name,
+        description: node.description,
+        background_color: node.background_color,
+        title_font_color: node.title_font_color,
+        caption_font_color: node.caption_font_color,
+        accent_color: node.accent_color,
+        theme_color: node.theme_color,
+        show_share_button: node.show_share_button,
+        theme: node.theme,
+        mouse_effects_enabled: node.mouse_effects_enabled,
+        text_shadows_enabled: node.text_shadows_enabled,
+        hide_powered_by: node.hide_powered_by,
+        page_title: node.page_title,
+      },
+      links: links.map(link => ({
+        name: link.name,
+        display_name: link.display_name,
+        link: link.link,
+        description: link.description,
+        icon: link.icon,
+        visible: link.visible,
+        enabled: link.enabled,
+        mini: link.mini,
+        position: link.position,
+        gradient_type: link.gradient_type,
+        gradient_angle: link.gradient_angle,
+        color_stops: link.color_stops || [],
+        custom_accent_color_enabled: link.custom_accent_color_enabled,
+        custom_accent_color: link.custom_accent_color,
+        custom_title_color_enabled: link.custom_title_color_enabled,
+        custom_title_color: link.custom_title_color,
+        custom_description_color_enabled: link.custom_description_color_enabled,
+        custom_description_color: link.custom_description_color,
+        mini_background_enabled: link.mini_background_enabled,
+      })),
+      export_date: new Date().toISOString(),
+      version: '1.0'
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${node.subdomain_name}-node.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Node Exported",
+      description: `Successfully exported ${node.display_name} with ${links.length} links.`,
+    });
+  };
+
+  const handleImportNode = async (file: File) => {
+    try {
+      const text = await file.text();
+      const importData = JSON.parse(text);
+
+      // Validate the import data structure
+      if (!importData.node || !importData.links || !Array.isArray(importData.links)) {
+        throw new Error('Invalid file format. Please select a valid Treenode export file.');
+      }
+
+      // Update node with imported data (ignore subdomain_name)
+      const updatedNode = {
+        ...node!,
+        display_name: importData.node.display_name || node!.display_name,
+        description: importData.node.description || node!.description,
+        background_color: importData.node.background_color || node!.background_color,
+        title_font_color: importData.node.title_font_color || node!.title_font_color,
+        caption_font_color: importData.node.caption_font_color || node!.caption_font_color,
+        accent_color: importData.node.accent_color || node!.accent_color,
+        theme_color: importData.node.theme_color || node!.theme_color,
+        show_share_button: importData.node.show_share_button ?? node!.show_share_button,
+        theme: importData.node.theme || node!.theme,
+        mouse_effects_enabled: importData.node.mouse_effects_enabled ?? node!.mouse_effects_enabled,
+        text_shadows_enabled: importData.node.text_shadows_enabled ?? node!.text_shadows_enabled,
+        hide_powered_by: importData.node.hide_powered_by ?? node!.hide_powered_by,
+        page_title: importData.node.page_title || node!.page_title,
+        // Keep the original subdomain_name - don't import it
+        subdomain_name: node!.subdomain_name,
+      };
+
+      // Update node
+      await handleUpdateNode(updatedNode);
+
+      // Clear existing links - wait for all deletions to complete
+      try {
+        const deletePromises = links.map(link => handleDeleteLink(link.id));
+        await Promise.all(deletePromises);
+        
+        // Wait a moment to ensure database is updated
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error('Error deleting existing links:', error);
+        toast({
+          title: "Import Failed",
+          description: "Failed to clear existing links. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Import links using API directly to support all properties
+      let importedCount = 0;
+      const importErrors: string[] = [];
+
+      console.log('Starting import of', importData.links.length, 'links');
+      
+      for (const linkData of importData.links) {
+        try {
+          const response = await apiClient.createLink(nodeId, {
+            name: linkData.name,
+            display_name: linkData.display_name,
+            link: linkData.link,
+            icon: linkData.icon || 'globe',
+            visible: linkData.visible ?? true,
+            enabled: linkData.enabled ?? true,
+            mini: linkData.mini ?? false,
+            gradient_type: linkData.gradient_type || 'solid',
+            gradient_angle: linkData.gradient_angle || 0,
+            color_stops: linkData.color_stops || [],
+            custom_accent_color_enabled: linkData.custom_accent_color_enabled ?? false,
+            custom_accent_color: linkData.custom_accent_color || '',
+            custom_title_color_enabled: linkData.custom_title_color_enabled ?? false,
+            custom_title_color: linkData.custom_title_color || '',
+            custom_description_color_enabled: linkData.custom_description_color_enabled ?? false,
+            custom_description_color: linkData.custom_description_color || '',
+            mini_background_enabled: linkData.mini_background_enabled ?? false,
+          });
+
+          if (response.error === 'Unauthorized') {
+            router.push('/login');
+            return;
+          }
+
+          if (response.data) {
+            importedCount++;
+            console.log('Successfully imported:', linkData.display_name);
+          } else {
+            console.error('Failed to import link:', linkData.display_name, response.error);
+            importErrors.push(`${linkData.display_name}: ${response.error}`);
+          }
+        } catch (error) {
+          console.error('Error importing link:', linkData.display_name, error);
+          importErrors.push(`${linkData.display_name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      // Reload links to ensure UI is updated
+      const linksResponse = await apiClient.getLinks(nodeId);
+      if (linksResponse.data) {
+        setLinks(linksResponse.data as LinkType[]);
+      }
+
+      setShowImportDialog(false);
+      
+      if (importErrors.length > 0) {
+        toast({
+          title: "Import Partially Complete",
+          description: `Imported ${importedCount}/${importData.links.length} links. Some links failed to import.`,
+          variant: "destructive",
+        });
+        console.error('Import errors:', importErrors);
+      } else {
+        toast({
+          title: "Node Imported",
+          description: `Successfully imported ${importedCount} links.`,
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: error instanceof Error ? error.message : 'Failed to import node data.',
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading || loadingNode) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -614,6 +805,22 @@ export default function NodeManagementPage() {
                   </CardDescription>
                 </div>
                 <div className="flex items-center space-x-2 node-settings-actions">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportNode}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Node
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowImportDialog(true)}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import Node
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -1268,6 +1475,48 @@ export default function NodeManagementPage() {
                   <p className="text-sm text-muted-foreground">No pending invitations</p>
               )}
             </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import Node</DialogTitle>
+            <DialogDescription>
+              Import a node configuration from a JSON file. This will replace your current node settings and links.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="import-file">Select JSON File</Label>
+              <Input
+                id="import-file"
+                type="file"
+                accept=".json"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleImportNode(file);
+                  }
+                }}
+              />
+              <p className="text-xs text-muted-foreground">
+                Select a Treenode export file (.json) to import node settings and links.
+              </p>
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+              <div className="flex items-start space-x-2">
+                <XCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                <div className="text-sm text-yellow-800">
+                  <p className="font-medium">Warning</p>
+                  <p>Importing will replace all current node settings and links. This action cannot be undone.</p>
+                </div>
+              </div>
             </div>
           </div>
         </DialogContent>

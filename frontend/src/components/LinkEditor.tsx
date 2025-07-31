@@ -16,7 +16,7 @@ import {
   Image,
   Settings
 } from 'lucide-react';
-import { ICON_LIST } from '@/lib/icons';
+import { ICON_LIST } from '@/lib/icon-list';
 import TreenodeIcon from '@/components/TreenodeIcon';
 import { Link as LinkType } from '@/types';
 import { config } from '@/config';

@@ -3,29 +3,20 @@
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { 
-  Globe, 
-  Heart, 
-  Star,
-  Coffee,
   Github,
   Code,
   User,
   Plus,
-  Palette,
   Link,
   LogOut,
   ChevronLeft,
   ChevronRight,
   ArrowRight,
-  ExternalLink,
-  Camera,
-  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { Badge } from '@/components/ui/badge';
-import { ThemeRenderer, getAvailableThemes } from '@/components/themes/ThemeRegistry';
+import { getAvailableThemes } from '@/components/themes/ThemeRegistry';
 import TreenodeRenderer from '@/components/TreenodeRenderer';
 import { Node, Link as LinkType } from '@/types';
 import Head from 'next/head';
@@ -788,7 +779,7 @@ export default function LandingPage() {
             Create your account and start building your personalized link page in minutes.
           </p>
           <div className="bg-card rounded-lg p-8 max-w-md mx-auto">
-            <h3 className="text-xl font-semibold mb-4 text-green-600">
+            <h3 className="text-xl font-semibold mb-4">
               Start 100% free — make an account, start your page
             </h3>
             <Button 
@@ -808,7 +799,7 @@ export default function LandingPage() {
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold text-foreground mb-4">
-            It's Open Source
+            It&apos;s Open Source
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
             Treenode is built with transparency and community in mind. The entire codebase is open source, 

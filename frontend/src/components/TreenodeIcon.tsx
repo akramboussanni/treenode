@@ -7,8 +7,14 @@ import {
   LUCIDE_ICONS, 
   isSimpleIcon, 
   isLucideIcon,
-  type IconName 
 } from '@/lib/icon-list';
+
+// Type for Lucide icon components
+type LucideIconComponent = React.ComponentType<{
+  className?: string;
+  size?: number;
+  color?: string;
+}>;
 
 interface TreenodeIconProps {
   icon: string;
@@ -45,7 +51,7 @@ export default function TreenodeIcon({
   // Check if it's a Lucide Icon
   if (isLucideIcon(icon)) {
     const iconName = LUCIDE_ICONS[icon];
-    const LucideIcon = LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>;
+    const LucideIcon = LucideIcons[iconName as keyof typeof LucideIcons] as LucideIconComponent;
     return React.createElement(LucideIcon, {
       className,
       size: size

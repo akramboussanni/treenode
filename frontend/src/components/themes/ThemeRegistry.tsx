@@ -24,19 +24,19 @@ type ThemeComponent = React.ComponentType<ThemeProps>;
 
 // Theme registry mapping theme names to their components (wrapped with BaseTheme)
 const themeRegistry: Record<string, ThemeComponent> = {
-  'love': withBaseTheme(LoveTheme),
-  'retro-terminal': withBaseTheme(RetroTerminal),
-  'neon-cyber': withBaseTheme(NeonCyber),
-  'nature-forest': withBaseTheme(NatureForest),
-  'liquid-chrome': withBaseTheme(LiquidChrome),
   'galaxy': withBaseTheme(Galaxy),
   'ballpit': withBaseTheme(BallpitTheme),
+  'neon-cyber': withBaseTheme(NeonCyber),
+  'liquid-chrome': withBaseTheme(LiquidChrome),
+  'retro-terminal': withBaseTheme(RetroTerminal),
   'iridescence': withBaseTheme(Iridescence),
   'whirlwind': withBaseTheme(Whirlwind),
   'lightning': withBaseTheme(Lightning),
+  'nature-forest': withBaseTheme(NatureForest),
   'dotgrid': withBaseTheme(DotGrid),
   'threads': withBaseTheme(Threads),
   'beams': withBaseTheme(Beams),
+  'love': withBaseTheme(LoveTheme),
   'waves': withBaseTheme(Waves),
   'dither': withBaseTheme(Dither),
 };
